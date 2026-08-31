@@ -24,6 +24,7 @@ abstract final class DalmColors {
   static const destructive = DalmPalette.coral;
   static const success = DalmPalette.sage;
   static const kakao = DalmPalette.kakaoYellow;
+  static const kakaoText = DalmPalette.kakaoText;
 
   static const overlay = Color(0x66000000);
 }

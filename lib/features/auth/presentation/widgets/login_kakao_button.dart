@@ -16,7 +16,7 @@ class LoginKakaoButton extends StatelessWidget {
         onPressed: onPressed,
         style: FilledButton.styleFrom(
           backgroundColor: DalmColors.kakao,
-          foregroundColor: const Color(0xDE000000),
+          foregroundColor: DalmColors.kakaoText,
           elevation: 0,
           textStyle: DalmTypography.button,
           shape: RoundedRectangleBorder(
