@@ -6,6 +6,6 @@ void main() {
   testWidgets('DALM 앱이 스플래시 화면으로 시작된다', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: DalmApp()));
 
-    expect(find.text('스플래시'), findsOneWidget);
+    expect(find.text('서로 다른 하루가 잠시 서로를 닮았어요.'), findsOneWidget);
   });
 }
