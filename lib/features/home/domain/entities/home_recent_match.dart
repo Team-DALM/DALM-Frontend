@@ -6,7 +6,6 @@ final class HomeRecentMatch {
     required this.partnerImageUrl,
     required this.aiTitle,
     required this.matchedAt,
-    required this.isRead,
   });
 
   // 매칭 및 사진 정보
@@ -18,5 +17,4 @@ final class HomeRecentMatch {
   // 매칭 결과 정보
   final String aiTitle;
   final DateTime matchedAt;
-  final bool isRead;
 }
