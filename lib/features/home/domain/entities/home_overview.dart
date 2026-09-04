@@ -8,6 +8,7 @@ final class HomeOverview {
     required this.todayPhoto,
     required this.searchingMoments,
     required this.recentMatch,
+    required this.unreadMatchCount,
   });
 
   // 오늘 새로운 사진을 등록할 수 있는지 여부
@@ -21,4 +22,7 @@ final class HomeOverview {
 
   // 과거 사진에서 가장 최근에 발생한 매칭
   final HomeRecentMatch? recentMatch;
+
+  // 사용자가 아직 확인하지 않은 과거 매칭 개수
+  final int unreadMatchCount;
 }
