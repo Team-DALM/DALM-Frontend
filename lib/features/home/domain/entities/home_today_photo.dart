@@ -9,11 +9,13 @@ final class HomeTodayPhoto {
     this.aiTitle,
     this.searchExpiresAt,
     this.remainingDays,
-    this.matchId,
-    this.matchedAt,
+    this.match,
     this.rejectionCode,
     this.rejectionMessage,
-  });
+  }) : assert(
+         status != HomeTodayPhotoStatus.matched || match != null,
+         '매칭 완료 상태에서는 매칭 정보가 필요합니다.',
+       );
 
   // 모든 사진 상태에서 사용하는 기본 정보
   final String id;
@@ -29,10 +31,21 @@ final class HomeTodayPhoto {
   final int? remainingDays;
 
   // 매칭 완료(MATCHED)일 때 사용하는 정보
-  final String? matchId;
-  final DateTime? matchedAt;
+  final HomeTodayMatch? match;
 
   // 사진 거절(REJECTED)일 때 사용하는 정보
   final String? rejectionCode;
   final String? rejectionMessage;
+}
+
+final class HomeTodayMatch {
+  const HomeTodayMatch({
+    required this.matchId,
+    required this.partnerImageUrl,
+    required this.matchedAt,
+  });
+
+  final String matchId;
+  final String partnerImageUrl;
+  final DateTime matchedAt;
 }
