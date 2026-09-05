@@ -7,6 +7,11 @@ import '../dtos/home_searching_moment_dto.dart';
 import '../../domain/entities/home_recent_match.dart';
 import '../dtos/home_recent_match_dto.dart';
 
+import '../../domain/entities/home_overview.dart';
+import '../dtos/home_recent_match_data_dto.dart';
+import '../dtos/home_searching_moment_list_dto.dart';
+import '../dtos/home_today_data_dto.dart';
+
 final class HomeMapper {
   const HomeMapper._();
 
@@ -94,5 +99,45 @@ final class HomeMapper {
       aiTitle: dto.aiTitle,
       matchedAt: dto.matchedAt,
     );
+  }
+
+  static HomeOverview toHomeOverview({
+    required HomeTodayDataDto todayData,
+    required HomeSearchingMomentListDto searchingData,
+    required HomeRecentMatchDataDto recentMatchData,
+  }) {
+    final recentMatch = toRecentMatchEntity(recentMatchData.match);
+
+    _validateRecentMatchData(
+      recentMatch: recentMatch,
+      unviewedMatchCount: recentMatchData.unviewedMatchCount,
+    );
+
+    return HomeOverview(
+      canRegister: todayData.canRegister,
+      todayPhoto: toTodayPhotoEntity(todayData.photo),
+      searchingMoments: List.unmodifiable(
+        searchingData.items.map(toSearchingMomentEntity),
+      ),
+      recentMatch: recentMatch,
+      unviewedMatchCount: recentMatchData.unviewedMatchCount,
+    );
+  }
+
+  static void _validateRecentMatchData({
+    required HomeRecentMatch? recentMatch,
+    required int unviewedMatchCount,
+  }) {
+    if (unviewedMatchCount < 0) {
+      throw const FormatException('미확인 매칭 개수는 음수가 될 수 없습니다.');
+    }
+
+    if (unviewedMatchCount == 0 && recentMatch != null) {
+      throw const FormatException('미확인 매칭이 없지만 매칭 데이터가 존재합니다.');
+    }
+
+    if (unviewedMatchCount > 0 && recentMatch == null) {
+      throw const FormatException('미확인 매칭이 있지만 표시할 매칭 데이터가 없습니다.');
+    }
   }
 }
