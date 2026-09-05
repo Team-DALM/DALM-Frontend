@@ -4,6 +4,9 @@ import '../dtos/home_today_photo_dto.dart';
 import '../../domain/entities/home_searching_moment.dart';
 import '../dtos/home_searching_moment_dto.dart';
 
+import '../../domain/entities/home_recent_match.dart';
+import '../dtos/home_recent_match_dto.dart';
+
 final class HomeMapper {
   const HomeMapper._();
 
@@ -75,6 +78,21 @@ final class HomeMapper {
       registeredAt: dto.registeredAt,
       searchExpiresAt: dto.searchExpiresAt,
       remainingDays: dto.remainingDays,
+    );
+  }
+
+  static HomeRecentMatch? toRecentMatchEntity(HomeRecentMatchDto? dto) {
+    if (dto == null) {
+      return null;
+    }
+
+    return HomeRecentMatch(
+      matchId: dto.matchId,
+      myPhotoId: dto.myPhotoId,
+      myImageUrl: dto.myImageUrl,
+      partnerImageUrl: dto.partnerImageUrl,
+      aiTitle: dto.aiTitle,
+      matchedAt: dto.matchedAt,
     );
   }
 }
