@@ -1,6 +1,9 @@
 import '../../domain/entities/home_today_photo.dart';
 import '../dtos/home_today_photo_dto.dart';
 
+import '../../domain/entities/home_searching_moment.dart';
+import '../dtos/home_searching_moment_dto.dart';
+
 final class HomeMapper {
   const HomeMapper._();
 
@@ -55,6 +58,23 @@ final class HomeMapper {
       matchId: matchId,
       partnerImageUrl: partnerImageUrl,
       matchedAt: matchedAt,
+    );
+  }
+
+  static HomeSearchingMoment toSearchingMomentEntity(
+    HomeSearchingMomentDto dto,
+  ) {
+    if (dto.status.toUpperCase() != 'SEARCHING') {
+      throw FormatException('탐색 중 사진이 아닌 상태입니다: ${dto.status}');
+    }
+
+    return HomeSearchingMoment(
+      id: dto.photoId,
+      imageUrl: dto.imageUrl,
+      aiTitle: dto.aiTitle,
+      registeredAt: dto.registeredAt,
+      searchExpiresAt: dto.searchExpiresAt,
+      remainingDays: dto.remainingDays,
     );
   }
 }
