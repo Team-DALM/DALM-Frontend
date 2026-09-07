@@ -16,4 +16,14 @@ abstract final class AppConfig {
 
     return value;
   }
+
+  static final termsOfServiceUri = Uri.parse(
+    'https://app.notion.com/p/DALM-3d4cb76aa8eb80ab821be73c75ceb66f'
+    '?source=copy_link',
+  );
+
+  static final privacyPolicyUri = Uri.parse(
+    'https://app.notion.com/p/DALM-3d4cb76aa8eb800f990fc47505de6767'
+    '?source=copy_link',
+  );
 }
