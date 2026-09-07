@@ -13,6 +13,7 @@ class DalmPhotoPair extends StatelessWidget {
     required this.leftImage,
     required this.status,
     this.rightImage,
+    this.hiddenLabel = '아직 가려진\n낯선 사람의 장면',
   }) : assert(
          status == DalmPhotoPairStatus.searching || rightImage != null,
          'hidden 또는 revealed 상태에서는 오른쪽 이미지가 필요합니다.',
@@ -21,6 +22,7 @@ class DalmPhotoPair extends StatelessWidget {
   final ImageProvider leftImage;
   final ImageProvider? rightImage;
   final DalmPhotoPairStatus status;
+  final String hiddenLabel;
 
   static const double _imageAspectRatio = 3 / 4; // 사진 가로, 세로 비율
   static const double _gap = 8;
@@ -120,7 +122,7 @@ class DalmPhotoPair extends StatelessWidget {
         ColoredBox(color: DalmColors.surface.withValues(alpha: 0.72)),
         Center(
           child: Text(
-            '아직 가려진\n낯선 사람의 장면',
+            hiddenLabel,
             textAlign: TextAlign.center,
             style: DalmTypography.caption.copyWith(
               color: DalmColors.textSecondary,
