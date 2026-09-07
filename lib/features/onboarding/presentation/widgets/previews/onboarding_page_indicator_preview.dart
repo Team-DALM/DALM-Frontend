@@ -11,9 +11,7 @@ Widget _previewFrame({required int currentPage}) {
     theme: DalmTheme.light,
     home: Scaffold(
       backgroundColor: DalmColors.background,
-      body: Center(
-        child: OnboardingPageIndicator(currentPage: currentPage),
-      ),
+      body: Center(child: OnboardingPageIndicator(currentPage: currentPage)),
     ),
   );
 }

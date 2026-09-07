@@ -9,6 +9,7 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: DalmApp()));
 
     expect(find.text('서로 다른 하루가 잠시 서로를 닮았어요.'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
   });
 
   testWidgets('바텀 네비게이션 메뉴를 표시한다', (tester) async {

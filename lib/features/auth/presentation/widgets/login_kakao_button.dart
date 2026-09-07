@@ -19,18 +19,12 @@ class LoginKakaoButton extends StatelessWidget {
           foregroundColor: DalmColors.kakaoText,
           elevation: 0,
           textStyle: DalmTypography.button,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets/icons/login_kakao.png',
-              width: 26,
-              height: 24,
-            ),
+            Image.asset('assets/icons/login_kakao.png', width: 26, height: 24),
             const SizedBox(width: 22.5),
             const Text('카카오로 계속하기'),
           ],

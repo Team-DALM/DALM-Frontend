@@ -7,18 +7,18 @@ import 'package:flutter/material.dart';
 class OnboardingSecondPage extends StatelessWidget {
   const OnboardingSecondPage({super.key});
 
-  static const _photoWidth = 184.0;
-  static const _photoHeight = 246.0;
+  static const _photoWidth = 218.0;
+  static const _photoHeight = 290.0;
 
   @override
   Widget build(BuildContext context) {
     return const OnboardingPageLayout(
-      currentDay: 4,
+      currentDay: 5,
       title: '7일 동안, 닮은 시선을 찾아요.',
       description: '가까운 곳에서 기록된 장면 중\n구도와 빛, 분위기가 닮은 한 장을 연결해요.',
       visual: Padding(
-        padding: EdgeInsets.only(left: 43),
-        child: SizedBox(width: 264, height: 284, child: _OverlappingPhotos()),
+        padding: EdgeInsets.only(left: 52),
+        child: SizedBox(width: 303, height: 333, child: _OverlappingPhotos()),
       ),
     );
   }
@@ -42,8 +42,8 @@ class _OverlappingPhotos extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: 39,
-          left: 80,
+          top: 43,
+          left: 85,
           width: OnboardingSecondPage._photoWidth,
           height: OnboardingSecondPage._photoHeight,
           child: _PhotoCard(
@@ -67,17 +67,16 @@ class _PhotoCard extends StatelessWidget {
     return DalmPhotoFrame(
       image: AssetImage(imagePath),
       aspectRatio:
-          OnboardingSecondPage._photoWidth /
-          OnboardingSecondPage._photoHeight,
+          OnboardingSecondPage._photoWidth / OnboardingSecondPage._photoHeight,
       borderRadius: const BorderRadius.all(Radius.circular(4)),
       overlay: Positioned(
-        left: 10,
-        bottom: 10,
+        left: 16,
+        bottom: 14,
         child: Text(
           label,
           style: DalmTypography.caption.copyWith(
-            fontSize: 8,
-            fontWeight: FontWeight.w500,
+            fontSize: 9,
+            fontWeight: FontWeight.w400,
             color: DalmColors.textInverse,
           ),
         ),

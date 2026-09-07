@@ -6,11 +6,7 @@ import 'package:flutter/widget_previews.dart';
 
 void _onPreviewPressed() {}
 
-@Preview(
-  name: '기본',
-  group: 'LoginKakaoButton',
-  size: Size(390, 140),
-)
+@Preview(name: '기본', group: 'LoginKakaoButton', size: Size(390, 140))
 Widget kakaoLoginButtonPreview() {
   return MaterialApp(
     debugShowCheckedModeBanner: false,

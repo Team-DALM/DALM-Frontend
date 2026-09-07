@@ -28,9 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: _SplashContent(),
-    );
+    return const Scaffold(body: _SplashContent());
   }
 }
 
@@ -70,11 +68,7 @@ class _SplashBrandSection extends StatelessWidget {
         children: [
           const SizedBox(width: 188, child: _ParallelLines()),
           const SizedBox(height: 24),
-          Image.asset(
-            'assets/logos/logo_dalm.png',
-            width: 169,
-            height: 58,
-          ),
+          Image.asset('assets/logos/logo_dalm.png', width: 169, height: 58),
           const SizedBox(height: 4),
           Text(
             '서로 다른 하루가 잠시 서로를 닮았어요.',

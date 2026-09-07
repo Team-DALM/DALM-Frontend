@@ -11,6 +11,7 @@ class OnboardingPageLayout extends StatelessWidget {
     required this.description,
     this.currentDay,
     this.showDayProgress = true,
+    this.visualHeight = _defaultVisualHeight,
   }) : assert(
          !showDayProgress || currentDay != null,
          '진행 바를 표시하려면 currentDay가 필요합니다.',
@@ -19,10 +20,11 @@ class OnboardingPageLayout extends StatelessWidget {
   final Widget visual;
   final int? currentDay;
   final bool showDayProgress;
+  final double visualHeight;
   final String title;
   final String description;
 
-  static const _visualHeight = 350.0;
+  static const _defaultVisualHeight = 350.0;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,7 @@ class OnboardingPageLayout extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 84),
-        SizedBox(width: double.infinity, height: _visualHeight, child: visual),
+        SizedBox(width: double.infinity, height: visualHeight, child: visual),
         const SizedBox(height: 21),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28),

@@ -5,6 +5,7 @@ import 'package:dalm/core/widgets/dalm_button.dart';
 import 'package:dalm/features/onboarding/presentation/widgets/onboarding_first_page.dart';
 import 'package:dalm/features/onboarding/presentation/widgets/onboarding_page_indicator.dart';
 import 'package:dalm/features/onboarding/presentation/widgets/onboarding_second_page.dart';
+import 'package:dalm/features/onboarding/presentation/widgets/onboarding_third_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -19,7 +20,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pageController = PageController();
   int _currentPage = 0;
 
-  static const _pageLabels = ['온보딩2', '온보딩3'];
+  static const _pageCount = 3;
 
   @override
   void dispose() {
@@ -28,7 +29,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _moveToNextPage() {
-    if (_currentPage == _pageLabels.length) {
+    if (_currentPage == _pageCount - 1) {
       context.go(AppRoutes.login);
       return;
     }
@@ -41,7 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLastPage = _currentPage == _pageLabels.length;
+    final isLastPage = _currentPage == _pageCount - 1;
 
     return Scaffold(
       body: SafeArea(
@@ -63,7 +64,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
-                itemCount: _pageLabels.length + 1,
+                itemCount: _pageCount,
                 onPageChanged: (page) {
                   setState(() => _currentPage = page);
                 },
@@ -76,7 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     return const OnboardingSecondPage();
                   }
 
-                  return Center(child: Text(_pageLabels[index - 1]));
+                  return const OnboardingThirdPage();
                 },
               ),
             ),
@@ -85,7 +86,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(28, 0, 28, 68),
               child: DalmButton(
-                label: isLastPage ? '시작하기' : '다음',
+                label: isLastPage ? 'DALM 시작하기' : '다음',
                 onPressed: _moveToNextPage,
               ),
             ),
