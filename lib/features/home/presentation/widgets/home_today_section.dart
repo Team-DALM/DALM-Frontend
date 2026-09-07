@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/dalm_colors.dart';
 import '../../../../app/theme/dalm_typography.dart';
+import '../../../../core/widgets/dalm_photo_frame.dart';
 import '../../../../core/widgets/dalm_photo_pair.dart';
 import '../../domain/entities/home_today_photo.dart';
 import 'home_headline.dart';
@@ -225,10 +226,234 @@ class _ValidatingTodayView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _TodayStatePlaceholder(
-      title: '사진 확인 중',
-      description: '사진이 등록 가능한 장면인지 확인하고 있습니다.',
-      layout: layout,
+    return MediaQuery.withNoTextScaling(
+      child: Semantics(
+        liveRegion: true,
+        label: '오늘 등록한 사진을 확인하고 있습니다.',
+        child: switch (layout) {
+          HomeTodaySectionLayout.primary => _PrimaryValidatingTodayView(
+            photo: photo,
+          ),
+          HomeTodaySectionLayout.compact => _CompactValidatingTodayView(
+            photo: photo,
+          ),
+        },
+      ),
+    );
+  }
+}
+
+class _PrimaryValidatingTodayView extends StatelessWidget {
+  const _PrimaryValidatingTodayView({required this.photo});
+
+  final HomeTodayPhoto photo;
+
+  static const double _cardRadius = 10;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const HomeHeadline(
+          title: '오늘의 장면을 살펴보고 있어요.',
+          description: '사진을 확인한 뒤 닮은 순간을 찾기 시작해요.',
+        ),
+        const SizedBox(height: 24),
+        Material(
+          color: DalmColors.surface,
+          borderRadius: BorderRadius.circular(_cardRadius),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+            child: Column(
+              children: [
+                FractionallySizedBox(
+                  widthFactor: 0.72,
+                  child: DalmPhotoFrame(
+                    image: NetworkImage(photo.imageUrl),
+                    semanticLabel: '확인 중인 오늘의 사진',
+                    overlay: const _ValidatingPhotoOverlay(),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const _ValidatingDot(),
+                    const SizedBox(width: 8),
+                    Text(
+                      '사진 적합성 확인 중',
+                      style: DalmTypography.bodyBold.copyWith(
+                        color: DalmColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  '잠시 후 결과를 알려드릴게요.',
+                  style: DalmTypography.caption.copyWith(
+                    color: DalmColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CompactValidatingTodayView extends StatelessWidget {
+  const _CompactValidatingTodayView({required this.photo});
+
+  final HomeTodayPhoto photo;
+
+  static const double _cardRadius = 10;
+  static const double _cardAspectRatio = 2.15;
+  static const double _imageWidthFactor = 0.34;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              '오늘의 장면',
+              style: DalmTypography.bodyBold.copyWith(
+                color: DalmColors.textPrimary,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '사진 확인 중',
+              style: DalmTypography.caption.copyWith(
+                color: DalmColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        AspectRatio(
+          aspectRatio: _cardAspectRatio,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Material(
+                color: DalmColors.surface,
+                borderRadius: BorderRadius.circular(_cardRadius),
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: constraints.maxWidth * _imageWidthFactor,
+                        child: DalmPhotoFrame(
+                          image: NetworkImage(photo.imageUrl),
+                          semanticLabel: '확인 중인 오늘의 사진',
+                          overlay: const _ValidatingPhotoOverlay(compact: true),
+                        ),
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const _ValidatingDot(),
+                                const SizedBox(width: 7),
+                                Text(
+                                  'PHOTO CHECK',
+                                  style: DalmTypography.caption.copyWith(
+                                    fontSize: 9,
+                                    letterSpacing: 0.3,
+                                    color: DalmColors.secondaryAction,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              '사진을 천천히\n살펴보고 있어요.',
+                              style: DalmTypography.serifBody.copyWith(
+                                color: DalmColors.textPrimary,
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              '곧 탐색을 시작해요.',
+                              style: DalmTypography.caption.copyWith(
+                                color: DalmColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ValidatingPhotoOverlay extends StatelessWidget {
+  const _ValidatingPhotoOverlay({this.compact = false});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: DalmColors.overlay.withValues(alpha: compact ? 0.22 : 0.28),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox.square(
+              dimension: compact ? 22 : 30,
+              child: const CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: DalmColors.textInverse,
+              ),
+            ),
+            if (!compact) ...[
+              const SizedBox(height: 12),
+              Text(
+                '장면을 읽는 중',
+                style: DalmTypography.caption.copyWith(
+                  color: DalmColors.textInverse,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ValidatingDot extends StatelessWidget {
+  const _ValidatingDot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 7,
+      height: 7,
+      decoration: const BoxDecoration(
+        color: DalmColors.secondaryAction,
+        shape: BoxShape.circle,
+      ),
     );
   }
 }
