@@ -261,27 +261,15 @@ class _SearchingTodayView extends StatelessWidget {
   final HomeTodayPhoto photo;
   final HomeTodaySectionLayout layout;
 
-  static const int _totalDays = 7;
-
-  int get _currentDay {
-    final remainingDays = photo.remainingDays ?? _totalDays;
-
-    return (_totalDays - remainingDays + 1).clamp(1, _totalDays);
-  }
-
   @override
   Widget build(BuildContext context) {
     return MediaQuery.withNoTextScaling(
       child: switch (layout) {
         HomeTodaySectionLayout.primary => _PrimarySearchingTodayView(
           photo: photo,
-          currentDay: _currentDay,
-          totalDays: _totalDays,
         ),
         HomeTodaySectionLayout.compact => _CompactSearchingTodayView(
           photo: photo,
-          currentDay: _currentDay,
-          totalDays: _totalDays,
         ),
       },
     );
@@ -289,15 +277,9 @@ class _SearchingTodayView extends StatelessWidget {
 }
 
 class _PrimarySearchingTodayView extends StatelessWidget {
-  const _PrimarySearchingTodayView({
-    required this.photo,
-    required this.currentDay,
-    required this.totalDays,
-  });
+  const _PrimarySearchingTodayView({required this.photo});
 
   final HomeTodayPhoto photo;
-  final int currentDay;
-  final int totalDays;
 
   static const double _cardRadius = 10;
 
@@ -338,16 +320,7 @@ class _PrimarySearchingTodayView extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 22),
-                Text(
-                  'DAY $currentDay · $totalDays DAYS',
-                  style: DalmTypography.caption.copyWith(
-                    fontSize: 10,
-                    letterSpacing: 0.2,
-                    color: DalmColors.secondaryAction,
-                  ),
-                ),
-                const SizedBox(height: 7),
+                const SizedBox(height: 20),
                 Text(
                   photo.aiTitle ?? '가장 가까운 장면부터 살펴보고 있어요.',
                   maxLines: 2,
@@ -357,6 +330,12 @@ class _PrimarySearchingTodayView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
+                Text(
+                  '오늘부터 7일 동안 닮은 순간을 찾아요.',
+                  style: DalmTypography.caption.copyWith(
+                    color: DalmColors.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
@@ -367,15 +346,9 @@ class _PrimarySearchingTodayView extends StatelessWidget {
 }
 
 class _CompactSearchingTodayView extends StatelessWidget {
-  const _CompactSearchingTodayView({
-    required this.photo,
-    required this.currentDay,
-    required this.totalDays,
-  });
+  const _CompactSearchingTodayView({required this.photo});
 
   final HomeTodayPhoto photo;
-  final int currentDay;
-  final int totalDays;
 
   static const double _cardRadius = 10;
   static const double _cardAspectRatio = 2.05;
@@ -383,8 +356,6 @@ class _CompactSearchingTodayView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final remainingDays = photo.remainingDays ?? totalDays;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -398,7 +369,7 @@ class _CompactSearchingTodayView extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              'SEARCHING · DAY $currentDay',
+              'SEARCHING',
               style: DalmTypography.caption.copyWith(
                 fontSize: 10,
                 color: DalmColors.secondaryAction,
@@ -451,22 +422,13 @@ class _CompactSearchingTodayView extends StatelessWidget {
                               ),
                             ),
                             const Spacer(),
-                            const SizedBox(height: 6),
                             Text(
-                              '가장 가까운 장면부터 탐색 중',
+                              '평행한 순간 매칭 중',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: DalmTypography.caption.copyWith(
                                 fontSize: 10,
                                 color: DalmColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              '$remainingDays일 남음',
-                              style: DalmTypography.caption.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: DalmColors.destructive,
                               ),
                             ),
                           ],
@@ -526,11 +488,268 @@ class _MatchedTodayView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _TodayStatePlaceholder(
-      title: photo.aiTitle ?? '닮은 순간을 발견했어요',
-      description: '오늘 사진과 닮은 순간을 확인해보세요.',
-      layout: layout,
-      onTap: onTap,
+    final match = photo.match!;
+
+    return MediaQuery.withNoTextScaling(
+      child: switch (layout) {
+        HomeTodaySectionLayout.primary => _PrimaryMatchedTodayView(
+          photo: photo,
+          partnerImageUrl: match.partnerImageUrl,
+          onTap: onTap,
+        ),
+        HomeTodaySectionLayout.compact => _CompactMatchedTodayView(
+          photo: photo,
+          partnerImageUrl: match.partnerImageUrl,
+          onTap: onTap,
+        ),
+      },
+    );
+  }
+}
+
+class _PrimaryMatchedTodayView extends StatelessWidget {
+  const _PrimaryMatchedTodayView({
+    required this.photo,
+    required this.partnerImageUrl,
+    required this.onTap,
+  });
+
+  final HomeTodayPhoto photo;
+  final String partnerImageUrl;
+  final VoidCallback onTap;
+
+  static const double _cardRadius = 10;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'TODAY · MOMENT FOUND',
+          style: DalmTypography.caption.copyWith(
+            fontSize: 10,
+            letterSpacing: 0.2,
+            color: DalmColors.destructive,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          photo.aiTitle ?? '오늘 남긴 장면과 닮은\n시선이 벌써 도착했어요.',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: DalmTypography.serifHeadline.copyWith(
+            color: DalmColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 18),
+        Material(
+          color: DalmColors.surface,
+          borderRadius: BorderRadius.circular(_cardRadius),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  DalmPhotoPair(
+                    leftImage: NetworkImage(photo.imageUrl),
+                    rightImage: NetworkImage(partnerImageUrl),
+                    status: DalmPhotoPairStatus.hidden,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _TodayTimeText(registeredAt: photo.registeredAt),
+                      const Spacer(),
+                      Text(
+                        '닮은 순간 열기',
+                        style: DalmTypography.bodyBold.copyWith(
+                          fontSize: 12,
+                          color: DalmColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: DalmColors.textPrimary,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CompactMatchedTodayView extends StatelessWidget {
+  const _CompactMatchedTodayView({
+    required this.photo,
+    required this.partnerImageUrl,
+    required this.onTap,
+  });
+
+  final HomeTodayPhoto photo;
+  final String partnerImageUrl;
+  final VoidCallback onTap;
+
+  static const double _cardRadius = 10;
+  static const double _cardAspectRatio = 1.9;
+  static const double _pairWidthFactor = 0.5;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              '오늘의 발견',
+              style: DalmTypography.bodyBold.copyWith(
+                color: DalmColors.textPrimary,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '오늘 도착한 연결',
+              style: DalmTypography.caption.copyWith(
+                color: DalmColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        AspectRatio(
+          aspectRatio: _cardAspectRatio,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(_cardRadius),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x0A11141B),
+                      blurRadius: 14,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: DalmColors.surface,
+                  borderRadius: BorderRadius.circular(_cardRadius),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: onTap,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: constraints.maxWidth * _pairWidthFactor,
+                            child: DalmPhotoPair(
+                              leftImage: NetworkImage(photo.imageUrl),
+                              rightImage: NetworkImage(partnerImageUrl),
+                              status: DalmPhotoPairStatus.hidden,
+                              hiddenLabel: '아직 가려진\n낯선 장면',
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'MOMENT FOUND',
+                                  style: DalmTypography.caption.copyWith(
+                                    fontSize: 9,
+                                    letterSpacing: 0.3,
+                                    color: DalmColors.destructive,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  photo.aiTitle ?? '닮은 순간을 발견했어요.',
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: DalmTypography.serifBody.copyWith(
+                                    fontSize: 14,
+                                    height: 1.5,
+                                    color: DalmColors.textPrimary,
+                                  ),
+                                ),
+                                const Spacer(),
+                                const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  color: DalmColors.border,
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Text(
+                                      '열어보기',
+                                      style: DalmTypography.caption.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: DalmColors.textPrimary,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Container(
+                                      width: 26,
+                                      height: 26,
+                                      decoration: const BoxDecoration(
+                                        color: DalmColors.surfaceMuted,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.arrow_forward,
+                                        size: 14,
+                                        color: DalmColors.textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TodayTimeText extends StatelessWidget {
+  const _TodayTimeText({required this.registeredAt});
+
+  final DateTime registeredAt;
+
+  @override
+  Widget build(BuildContext context) {
+    final localDate = registeredAt.toLocal();
+    final hour = localDate.hour.toString().padLeft(2, '0');
+    final minute = localDate.minute.toString().padLeft(2, '0');
+
+    return Text(
+      'TODAY $hour:$minute',
+      style: DalmTypography.caption.copyWith(
+        fontSize: 10,
+        color: DalmColors.secondaryAction,
+      ),
     );
   }
 }
