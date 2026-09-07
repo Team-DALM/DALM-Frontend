@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_models/home_view_model.dart';
+import '../widgets/home_content.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -10,49 +11,30 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final homeState = ref.watch(homeViewModelProvider);
 
-    return homeState.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => _HomeErrorView(
-        message: error.toString(),
-        onRetry: () {
-          ref.read(homeViewModelProvider.notifier).refresh();
-        },
-      ),
-      data: (homeOverview) => RefreshIndicator(
-        onRefresh: () {
-          return ref.read(homeViewModelProvider.notifier).refresh();
-        },
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20),
-          children: [
-            const Text(
-              '홈 데이터 연결 완료',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 24),
-            Text('오늘 사진 등록 가능: ${homeOverview.canRegister}'),
-            const SizedBox(height: 8),
-            Text(
-              '오늘 사진 상태: '
-              '${homeOverview.todayPhoto?.status.name ?? '사진 없음'}',
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '과거 탐색 중 사진: '
-              '${homeOverview.searchingMoments.length}개',
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '미확인 매칭: '
-              '${homeOverview.unviewedMatchCount}개',
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '표시 중인 미확인 매칭: '
-              '${homeOverview.recentMatch?.matchId ?? '없음'}',
-            ),
-          ],
+    return SafeArea(
+      bottom: false,
+      child: homeState.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => _HomeErrorView(
+          message: error.toString(),
+          onRetry: () {
+            ref.read(homeViewModelProvider.notifier).refresh();
+          },
+        ),
+        data: (home) => HomeContent(
+          home: home,
+          onRefresh: () {
+            return ref.read(homeViewModelProvider.notifier).refresh();
+          },
+          onPhotoUpload: () {
+            // TODO: 사진 등록 화면 이동
+          },
+          onMatchTap: (matchId) {
+            // TODO: 매칭 결과 화면 이동
+          },
+          onSearchingMomentTap: (photoId) {
+            // TODO: 탐색 중인 사진 상세 화면 이동
+          },
         ),
       ),
     );
@@ -68,7 +50,7 @@ class _HomeErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -77,6 +59,8 @@ class _HomeErrorView extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               message,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall,
             ),

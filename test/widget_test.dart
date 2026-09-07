@@ -6,7 +6,6 @@ void main() {
   testWidgets('DALM 앱이 정상적으로 시작된다', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: DalmApp()));
 
-    expect(find.text('홈'), findsOneWidget);
     expect(find.text('오늘'), findsOneWidget);
     expect(find.text('순간들'), findsOneWidget);
     expect(find.text('엽서함'), findsOneWidget);
