@@ -1,7 +1,7 @@
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_photo_frame.dart';
-import 'package:dalm/features/onboarding/widgets/onboarding_page_layout.dart';
+import 'package:dalm/features/onboarding/presentation/widgets/onboarding_page_layout.dart';
 import 'package:flutter/material.dart';
 
 class OnboardingSecondPage extends StatelessWidget {

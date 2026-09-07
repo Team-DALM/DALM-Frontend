@@ -1,7 +1,7 @@
 import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/features/auth/presentation/views/login_screen.dart';
-import 'package:dalm/features/onboarding/onboarding_screen.dart';
-import 'package:dalm/features/splash/splash_screen.dart';
+import 'package:dalm/features/onboarding/presentation/views/onboarding_screen.dart';
+import 'package:dalm/features/onboarding/presentation/views/splash_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final authRootRoutes = <RouteBase>[

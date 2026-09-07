@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 
-import '../../../../app/theme/dalm_colors.dart';
-import '../../../../app/theme/dalm_theme.dart';
+import '../../../../../app/theme/dalm_colors.dart';
+import '../../../../../app/theme/dalm_theme.dart';
 import '../onboarding_page_indicator.dart';
 
 Widget _previewFrame({required int currentPage}) {

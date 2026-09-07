@@ -1,5 +1,6 @@
 import 'package:dalm/app/app.dart';
 import 'package:dalm/core/widgets/dalm_bottom_navigation_bar.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,7 +13,7 @@ void main() {
 
   testWidgets('바텀 네비게이션 메뉴를 표시한다', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           bottomNavigationBar: DalmBottomNavigationBar(
             currentIndex: 0,

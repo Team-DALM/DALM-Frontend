@@ -2,9 +2,9 @@ import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_button.dart';
-import 'package:dalm/features/onboarding/widgets/onboarding_first_page.dart';
-import 'package:dalm/features/onboarding/widgets/onboarding_page_indicator.dart';
-import 'package:dalm/features/onboarding/widgets/onboarding_second_page.dart';
+import 'package:dalm/features/onboarding/presentation/widgets/onboarding_first_page.dart';
+import 'package:dalm/features/onboarding/presentation/widgets/onboarding_page_indicator.dart';
+import 'package:dalm/features/onboarding/presentation/widgets/onboarding_second_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
