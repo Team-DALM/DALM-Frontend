@@ -14,7 +14,7 @@ import 'dalm_navigation_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.splash,
     routes: [
       // 바텀 네비게이션 없이 열리는 화면
       ...authRootRoutes,
