@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/dalm_colors.dart';
 import '../../../../app/theme/dalm_typography.dart';
+import '../../../../core/widgets/dalm_button.dart';
 import '../../../../core/widgets/dalm_photo_frame.dart';
 import '../../../../core/widgets/dalm_photo_pair.dart';
 import '../../domain/entities/home_today_photo.dart';
@@ -471,11 +472,247 @@ class _RejectedTodayView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _TodayStatePlaceholder(
-      title: '사진을 다시 선택해주세요',
-      description: photo.rejectionMessage ?? '등록할 수 없는 사진입니다.',
-      layout: layout,
-      onTap: onPhotoUpload,
+    return MediaQuery.withNoTextScaling(
+      child: switch (layout) {
+        HomeTodaySectionLayout.primary => _PrimaryRejectedTodayView(
+          photo: photo,
+          onPhotoUpload: onPhotoUpload,
+        ),
+        HomeTodaySectionLayout.compact => _CompactRejectedTodayView(
+          photo: photo,
+          onPhotoUpload: onPhotoUpload,
+        ),
+      },
+    );
+  }
+}
+
+class _PrimaryRejectedTodayView extends StatelessWidget {
+  const _PrimaryRejectedTodayView({
+    required this.photo,
+    required this.onPhotoUpload,
+  });
+
+  final HomeTodayPhoto photo;
+  final VoidCallback onPhotoUpload;
+
+  static const double _cardRadius = 10;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const HomeHeadline(
+          title: '이 장면은 남기기 어려워요.',
+          description: '조금 다른 사진으로 오늘을 다시 남겨주세요.',
+        ),
+        const SizedBox(height: 24),
+        Material(
+          color: DalmColors.surface,
+          borderRadius: BorderRadius.circular(_cardRadius),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+            child: Column(
+              children: [
+                FractionallySizedBox(
+                  widthFactor: 0.68,
+                  child: DalmPhotoFrame(
+                    image: NetworkImage(photo.imageUrl),
+                    semanticLabel: '등록이 거절된 오늘의 사진',
+                    overlay: const _RejectedPhotoOverlay(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.info_outline,
+                      size: 17,
+                      color: DalmColors.destructive,
+                    ),
+                    const SizedBox(width: 7),
+                    Text(
+                      '사진 확인 결과',
+                      style: DalmTypography.bodyBold.copyWith(
+                        color: DalmColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: DalmColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    photo.rejectionMessage ?? '등록할 수 없는 사진입니다.',
+                    style: DalmTypography.body.copyWith(
+                      color: DalmColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DalmButton(label: '다른 사진 선택하기', onPressed: onPhotoUpload),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CompactRejectedTodayView extends StatelessWidget {
+  const _CompactRejectedTodayView({
+    required this.photo,
+    required this.onPhotoUpload,
+  });
+
+  final HomeTodayPhoto photo;
+  final VoidCallback onPhotoUpload;
+
+  static const double _cardRadius = 10;
+  static const double _cardAspectRatio = 1.95;
+  static const double _imageWidthFactor = 0.34;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              '오늘의 장면',
+              style: DalmTypography.bodyBold.copyWith(
+                color: DalmColors.textPrimary,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '다시 선택해주세요',
+              style: DalmTypography.caption.copyWith(
+                color: DalmColors.destructive,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        AspectRatio(
+          aspectRatio: _cardAspectRatio,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Material(
+                color: DalmColors.surface,
+                borderRadius: BorderRadius.circular(_cardRadius),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: onPhotoUpload,
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: constraints.maxWidth * _imageWidthFactor,
+                          child: DalmPhotoFrame(
+                            image: NetworkImage(photo.imageUrl),
+                            semanticLabel: '등록이 거절된 오늘의 사진',
+                            overlay: const _RejectedPhotoOverlay(compact: true),
+                          ),
+                        ),
+                        const SizedBox(width: 18),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'PHOTO CHECK',
+                                style: DalmTypography.caption.copyWith(
+                                  fontSize: 9,
+                                  letterSpacing: 0.3,
+                                  color: DalmColors.destructive,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '사진을 다시\n선택해주세요.',
+                                style: DalmTypography.serifBody.copyWith(
+                                  color: DalmColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 7),
+                              Text(
+                                photo.rejectionMessage ?? '등록할 수 없는 사진입니다.',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: DalmTypography.caption.copyWith(
+                                  fontSize: 10,
+                                  color: DalmColors.textSecondary,
+                                ),
+                              ),
+                              const Spacer(),
+                              Row(
+                                children: [
+                                  Text(
+                                    '다른 사진 고르기',
+                                    style: DalmTypography.caption.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: DalmColors.textPrimary,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  const Icon(
+                                    Icons.arrow_forward,
+                                    size: 15,
+                                    color: DalmColors.textPrimary,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RejectedPhotoOverlay extends StatelessWidget {
+  const _RejectedPhotoOverlay({this.compact = false});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: DalmColors.overlay.withValues(alpha: 0.18),
+      child: Center(
+        child: Container(
+          width: compact ? 30 : 42,
+          height: compact ? 30 : 42,
+          decoration: BoxDecoration(
+            color: DalmColors.surface.withValues(alpha: 0.9),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.close,
+            size: compact ? 17 : 22,
+            color: DalmColors.destructive,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -974,42 +1211,6 @@ class _TodayTimeText extends StatelessWidget {
       style: DalmTypography.caption.copyWith(
         fontSize: 10,
         color: DalmColors.secondaryAction,
-      ),
-    );
-  }
-}
-
-class _TodayStatePlaceholder extends StatelessWidget {
-  const _TodayStatePlaceholder({
-    required this.title,
-    required this.description,
-    required this.layout,
-    this.onTap,
-  });
-
-  final String title;
-  final String description;
-  final HomeTodaySectionLayout layout;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isPrimary = layout == HomeTodaySectionLayout.primary;
-
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.all(isPrimary ? 24 : 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              Text(description, style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ),
-        ),
       ),
     );
   }
