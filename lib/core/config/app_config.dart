@@ -1,6 +1,16 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 abstract final class AppConfig {
+  static String get kakaoNativeAppKey {
+    final value = dotenv.env['KAKAO_NATIVE_APP_KEY']?.trim();
+
+    if (value == null || value.isEmpty) {
+      throw StateError('KAKAO_NATIVE_APP_KEY가 설정되지 않았습니다.');
+    }
+
+    return value;
+  }
+
   static String get apiBaseUrl {
     final value = dotenv.env['API_BASE_URL']?.trim();
 

@@ -1,19 +1,38 @@
-import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/config/app_config.dart';
 import 'package:dalm/core/widgets/dalm_overlapping_photos.dart';
 import 'package:dalm/core/widgets/dalm_progress_indicator.dart';
 import 'package:dalm/features/auth/presentation/widgets/login_kakao_button.dart';
+import 'package:dalm/features/auth/presentation/view_models/login_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key, this.onTermsPressed, this.onPrivacyPressed});
 
   final VoidCallback? onTermsPressed;
   final VoidCallback? onPrivacyPressed;
+
+  Future<void> _loginWithKakao(BuildContext context, WidgetRef ref) async {
+    final result = await ref
+        .read(loginViewModelProvider.notifier)
+        .loginWithKakao();
+
+    // 로그인 취소 시 안내 없이 기존 화면 유지
+    if (!context.mounted || result == KakaoLoginResult.cancelled) return;
+
+    // 인증 결과에 맞는 안내 메시지 표시
+    final message = switch (result) {
+      KakaoLoginResult.authenticated => '카카오 인증에 성공했어요.',
+      KakaoLoginResult.failed => '카카오 로그인에 실패했어요. 다시 시도해주세요.',
+      KakaoLoginResult.cancelled => '',
+    };
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
 
   Future<void> _openExternalLink(
     BuildContext context, {
@@ -40,7 +59,9 @@ class LoginScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoginLoading = ref.watch(loginViewModelProvider);
+
     return Scaffold(
       body: SafeArea(
         child: LayoutBuilder(
@@ -97,9 +118,8 @@ class LoginScreen extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 28),
                         child: LoginKakaoButton(
-                          onPressed: () {
-                            context.go(AppRoutes.home);
-                          },
+                          isLoading: isLoginLoading,
+                          onPressed: () => _loginWithKakao(context, ref),
                         ),
                       ),
                       const SizedBox(height: 14),

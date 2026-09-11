@@ -1,12 +1,15 @@
 import 'package:dalm/features/auth/presentation/views/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('로그인 화면에 필요한 콘텐츠를 표시한다', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: LoginScreen(onTermsPressed: () {}, onPrivacyPressed: () {}),
+      ProviderScope(
+        child: MaterialApp(
+          home: LoginScreen(onTermsPressed: () {}, onPrivacyPressed: () {}),
+        ),
       ),
     );
 
@@ -22,11 +25,13 @@ void main() {
     var wasPressed = false;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: LoginScreen(
-          onTermsPressed: () {
-            wasPressed = true;
-          },
+      ProviderScope(
+        child: MaterialApp(
+          home: LoginScreen(
+            onTermsPressed: () {
+              wasPressed = true;
+            },
+          ),
         ),
       ),
     );
@@ -41,11 +46,13 @@ void main() {
     var wasPressed = false;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: LoginScreen(
-          onPrivacyPressed: () {
-            wasPressed = true;
-          },
+      ProviderScope(
+        child: MaterialApp(
+          home: LoginScreen(
+            onPrivacyPressed: () {
+              wasPressed = true;
+            },
+          ),
         ),
       ),
     );
