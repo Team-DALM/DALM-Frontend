@@ -41,6 +41,8 @@ dependencies:
   flutter_dotenv: ^6.0.1
   flutter_secure_storage: ^10.3.1
   json_annotation: ^4.12.0
+  kakao_flutter_sdk_user: ^2.0.1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +56,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.16.1
   json_serializable: ^6.14.1
+  flutter_native_splash: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -110,3 +113,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_native_splash:
+  color: "#F4F0E8"
+  android_12:
+    color: "#F4F0E8"
+    image: assets/images/native_splash_transparent.png
+    icon_background_color: "#F4F0E8"
