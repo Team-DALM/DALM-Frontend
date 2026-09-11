@@ -1,3 +1,4 @@
+import 'package:dalm/core/error/network_exception.dart';
 import 'package:dalm/features/auth/data/providers/auth_data_providers.dart';
 import 'package:dalm/features/auth/domain/repositories/kakao_auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,14 +20,23 @@ final class LoginViewModel extends Notifier<bool> {
     state = true;
 
     try {
-      final repository = ref.read(kakaoAuthRepositoryProvider);
-      // 카카오톡 또는 웹으로 카카오 인증 요청
-      await repository.login();
+      final kakaoRepository = ref.read(kakaoAuthRepositoryProvider);
+      final authRepository = ref.read(authRepositoryProvider);
+
+      // 카카오 로그인으로 액세스 토큰 발급
+      final kakaoAccessToken = await kakaoRepository.login();
+
+      // 카카오 액세스 토큰으로 DALM 서버 로그인
+      await authRepository.loginWithKakao(kakaoAccessToken);
 
       return KakaoLoginResult.authenticated;
     } on KakaoLoginCancelledException {
       return KakaoLoginResult.cancelled;
     } on KakaoLoginFailedException {
+      return KakaoLoginResult.failed;
+    } on NetworkException {
+      return KakaoLoginResult.failed;
+    } on Object {
       return KakaoLoginResult.failed;
     } finally {
       // 로그인 종료 시 로딩 상태 해제

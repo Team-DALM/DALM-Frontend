@@ -1,5 +1,6 @@
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
+import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/core/config/app_config.dart';
 import 'package:dalm/core/widgets/dalm_overlapping_photos.dart';
 import 'package:dalm/core/widgets/dalm_progress_indicator.dart';
@@ -7,6 +8,7 @@ import 'package:dalm/features/auth/presentation/widgets/login_kakao_button.dart'
 import 'package:dalm/features/auth/presentation/view_models/login_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -23,15 +25,15 @@ class LoginScreen extends ConsumerWidget {
     // 로그인 취소 시 안내 없이 기존 화면 유지
     if (!context.mounted || result == KakaoLoginResult.cancelled) return;
 
-    // 인증 결과에 맞는 안내 메시지 표시
-    final message = switch (result) {
-      KakaoLoginResult.authenticated => '카카오 인증에 성공했어요.',
-      KakaoLoginResult.failed => '카카오 로그인에 실패했어요. 다시 시도해주세요.',
-      KakaoLoginResult.cancelled => '',
-    };
+    if (result == KakaoLoginResult.authenticated) {
+      // 로그인 성공 시 홈 화면으로 이동
+      context.go(AppRoutes.home);
+      return;
+    }
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('카카오 로그인에 실패했어요. 다시 시도해주세요.')));
   }
 
   Future<void> _openExternalLink(
@@ -49,7 +51,7 @@ class LoginScreen extends ConsumerWidget {
         return;
       }
     } on Exception {
-      // 아래의 공통 안내 메시지를 표시합니다.
+      // 링크 열기 실패 시 공통 안내 표시
     }
 
     if (!context.mounted) return;

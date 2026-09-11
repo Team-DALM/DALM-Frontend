@@ -24,7 +24,7 @@ abstract final class AppConfig {
       throw StateError('API_BASE_URL 형식이 올바르지 않습니다: $value');
     }
 
-    return value;
+    return value.endsWith('/') ? value : '$value/';
   }
 
   static final termsOfServiceUri = Uri.parse(
