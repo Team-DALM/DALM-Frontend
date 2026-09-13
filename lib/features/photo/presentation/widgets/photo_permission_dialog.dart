@@ -90,11 +90,16 @@ class PhotoPermissionDialog extends StatelessWidget {
                   foregroundColor: DalmColors.textSecondary,
                   minimumSize: const Size(280, 32),
                   padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   textStyle: DalmTypography.caption.copyWith(fontSize: 11),
                 ),
                 child: const Text('지금은 허용하지 않기'),
               ),
-              const Divider(height: 1, color: DalmColors.border),
+              const Divider(
+                height: 1,
+                thickness: 1,
+                color: DalmColors.warmBorder,
+              ),
               const Spacer(),
               Text(
                 '설정에서 언제든 변경할 수 있어요.',

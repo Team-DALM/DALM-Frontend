@@ -51,4 +51,17 @@ void main() {
     expect(find.text('선택한 사진만 허용'), findsOneWidget);
     expect(find.text('지금은 허용하지 않기'), findsOneWidget);
   });
+
+  testWidgets('카메라 선택 시 카메라 접근 권한 안내를 표시한다', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: DalmTheme.light, home: const PhotoUploadScreen()),
+    );
+
+    await tester.tap(find.text('카메라로 촬영하기'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('카메라 사용 권한이 필요해요'), findsOneWidget);
+    expect(find.text('카메라 사용 허용'), findsOneWidget);
+    expect(find.text('지금은 허용하지 않기'), findsOneWidget);
+  });
 }

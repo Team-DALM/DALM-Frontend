@@ -1,6 +1,7 @@
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
+import 'package:dalm/features/photo/presentation/widgets/camera_permission_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_empty_placeholder.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_permission_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_source_action_card.dart';
@@ -14,6 +15,8 @@ class PhotoUploadScreen extends StatelessWidget {
     this.onAllowAllPhotos,
     this.onAllowSelectedPhotos,
     this.onDenyPhotoPermission,
+    this.onAllowCamera,
+    this.onDenyCameraPermission,
   });
 
   final VoidCallback? onCameraPressed;
@@ -21,6 +24,22 @@ class PhotoUploadScreen extends StatelessWidget {
   final VoidCallback? onAllowAllPhotos;
   final VoidCallback? onAllowSelectedPhotos;
   final VoidCallback? onDenyPhotoPermission;
+  final VoidCallback? onAllowCamera;
+  final VoidCallback? onDenyCameraPermission;
+
+  Future<void> _openCamera(BuildContext context) async {
+    if (onCameraPressed != null) {
+      onCameraPressed!();
+      return;
+    }
+
+    // 카메라 실행 전 사용자에게 권한 사용 목적 안내
+    await CameraPermissionDialog.show(
+      context,
+      onAllow: onAllowCamera ?? () {},
+      onDeny: onDenyCameraPermission ?? () {},
+    );
+  }
 
   Future<void> _openGallery(BuildContext context) async {
     if (onGalleryPressed != null) {
@@ -78,7 +97,7 @@ class PhotoUploadScreen extends StatelessWidget {
                               iconBackgroundColor: DalmColors.primaryAction,
                               title: '카메라로 촬영하기',
                               description: '지금 마주한 장면을 바로 남겨요.',
-                              onPressed: onCameraPressed ?? () {},
+                              onPressed: () => _openCamera(context),
                             ),
                             const SizedBox(height: 12),
                             PhotoSourceActionCard(
