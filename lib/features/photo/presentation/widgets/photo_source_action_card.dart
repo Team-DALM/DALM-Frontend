@@ -24,7 +24,7 @@ class PhotoSourceActionCard extends StatelessWidget {
       button: true,
       label: title,
       child: Material(
-        color: DalmColors.surface,
+        color: DalmColors.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: onPressed,
@@ -53,14 +53,19 @@ class PhotoSourceActionCard extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: DalmTypography.bodyBold.copyWith(fontSize: 13),
+                          style: DalmTypography.bodyBold.copyWith(
+                            fontSize: 13,
+                            height: 1.2,
+                            color: DalmColors.textInk,
+                          ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 7),
                         Text(
                           description,
                           style: DalmTypography.caption.copyWith(
                             fontSize: 9,
-                            color: DalmColors.textSecondary,
+                            height: 1.2,
+                            color: DalmColors.textWarm,
                           ),
                         ),
                       ],
@@ -69,7 +74,7 @@ class PhotoSourceActionCard extends StatelessWidget {
                   const Icon(
                     Icons.chevron_right_rounded,
                     size: 18,
-                    color: DalmColors.textSecondary,
+                    color: DalmColors.textWarm,
                   ),
                 ],
               ),

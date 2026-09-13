@@ -9,37 +9,51 @@ class PhotoEmptyPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: const _DashedRoundedBorderPainter(),
-      child: const SizedBox(
-        width: 240,
-        height: 300,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _AddPhotoIcon(),
-            SizedBox(height: 17),
-            Text(
-              '사진 한 장',
-              style: TextStyle(
-                fontFamily: DalmTypography.inter,
-                fontSize: 13,
-                height: 1.2,
-                fontWeight: FontWeight.w700,
-                color: DalmColors.textPrimary,
+    return SizedBox(
+      width: 240,
+      height: 300,
+      child: CustomPaint(
+        foregroundPainter: const _DashedRoundedBorderPainter(),
+        child: Material(
+          color: DalmColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(12),
+          clipBehavior: Clip.antiAlias,
+          child: const Stack(
+            children: [
+              Positioned(top: 91, left: 0, right: 0, child: _AddPhotoIcon()),
+              Positioned(
+                top: 168,
+                left: 0,
+                right: 0,
+                child: Text(
+                  '사진 한 장',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: DalmTypography.inter,
+                    fontSize: 13,
+                    height: 1.2,
+                    fontWeight: FontWeight.w700,
+                    color: DalmColors.textInk,
+                  ),
+                ),
               ),
-            ),
-            SizedBox(height: 17),
-            Text(
-              '4:5 세로 비율로 기록돼요.',
-              style: TextStyle(
-                fontFamily: DalmTypography.inter,
-                fontSize: 10,
-                height: 1.2,
-                color: DalmColors.textSecondary,
+              Positioned(
+                top: 200,
+                left: 0,
+                right: 0,
+                child: Text(
+                  '4:5 세로 비율로 기록돼요.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: DalmTypography.inter,
+                    fontSize: 10,
+                    height: 1.2,
+                    color: DalmColors.textWarm,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -52,7 +66,7 @@ class _AddPhotoIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SizedBox.square(
-      dimension: 72,
+      dimension: 62,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: DalmColors.background,
@@ -60,7 +74,7 @@ class _AddPhotoIcon extends StatelessWidget {
         ),
         child: Icon(
           Icons.add,
-          size: 39,
+          size: 30,
           weight: 200,
           color: DalmColors.secondaryAction,
         ),
@@ -72,14 +86,14 @@ class _AddPhotoIcon extends StatelessWidget {
 class _DashedRoundedBorderPainter extends CustomPainter {
   const _DashedRoundedBorderPainter();
 
-  static const _radius = Radius.circular(8);
-  static const _dashLength = 5.0;
-  static const _gapLength = 5.0;
+  static const _radius = Radius.circular(12);
+  static const _dashLength = 6.0;
+  static const _gapLength = 7.0;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = DalmColors.border
+      ..color = DalmColors.warmBorder
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
     final path = Path()

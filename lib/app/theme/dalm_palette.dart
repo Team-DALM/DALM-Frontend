@@ -8,10 +8,12 @@ abstract final class DalmPalette {
   static const ink = Color(0xFF292D35);
   static const stone = Color(0xFF6F6D68);
   static const secondary = Color(0xFF878686);
+  static const warmSecondary = Color(0xFF77736D);
   static const disabled = Color(0xFFA2A19E);
   static const cream = Color(0xFFFCFAF6);
   static const parchment = Color(0xFFF4F0E8);
   static const border = Color(0xFFE6E1D8);
+  static const warmBorder = Color(0xFFD8D2C8);
   static const slateBlue = Color(0xFF64749A);
   static const brandBlue = Color(0xFF8492B2);
   static const gold = Color(0xFFC8A96B);

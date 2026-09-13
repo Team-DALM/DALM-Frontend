@@ -12,6 +12,10 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actionLabel,
     this.onActionPressed,
     this.onMorePressed,
+    this.titleStyle,
+    this.leadingWidth,
+    this.dividerIndent = 0,
+    this.dividerColor = DalmColors.border,
   }) : assert(
          actionLabel == null || onActionPressed != null,
          'actionLabel을 사용하려면 onActionPressed도 전달해야 합니다.',
@@ -27,6 +31,10 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? actionLabel;
   final VoidCallback? onActionPressed;
   final VoidCallback? onMorePressed;
+  final TextStyle? titleStyle;
+  final double? leadingWidth;
+  final double dividerIndent;
+  final Color dividerColor;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -53,12 +61,15 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
               tooltip: '뒤로 가기',
             )
           : null,
+      leadingWidth: leadingWidth,
 
       titleSpacing: showBackButton ? 0 : 16,
 
       title: Text(
         title,
-        style: DalmTypography.title.copyWith(color: DalmColors.textPrimary),
+        style:
+            titleStyle ??
+            DalmTypography.title.copyWith(color: DalmColors.textPrimary),
       ),
 
       actions: [
@@ -87,9 +98,15 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
       ],
 
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(1),
-        child: Divider(height: 1, thickness: 1, color: DalmColors.border),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Divider(
+          height: 1,
+          thickness: 1,
+          indent: dividerIndent,
+          endIndent: dividerIndent,
+          color: dividerColor,
+        ),
       ),
     );
   }

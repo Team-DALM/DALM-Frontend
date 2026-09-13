@@ -10,9 +10,12 @@ abstract final class DalmColors {
   static const surfaceMuted = DalmPalette.cream;
   static const textPrimary = DalmPalette.deepInk;
   static const textSecondary = DalmPalette.secondary;
+  static const textWarm = DalmPalette.warmSecondary;
+  static const textInk = DalmPalette.ink;
   static const textDisabled = DalmPalette.disabled;
   static const textInverse = DalmPalette.white;
   static const border = DalmPalette.border;
+  static const warmBorder = DalmPalette.warmBorder;
   static const navigationInactive = DalmPalette.stone;
 
   static const primaryAction = DalmPalette.deepInk;

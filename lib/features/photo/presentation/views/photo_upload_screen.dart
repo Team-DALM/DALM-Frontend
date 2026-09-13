@@ -40,7 +40,19 @@ class PhotoUploadScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const DalmAppBar(title: '오늘의 사진', showBackButton: true),
+      appBar: const DalmAppBar(
+        title: '오늘의 사진',
+        showBackButton: true,
+        leadingWidth: 44,
+        dividerIndent: 20,
+        dividerColor: DalmColors.warmBorder,
+        titleStyle: TextStyle(
+          fontFamily: DalmTypography.inter,
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: DalmColors.textInk,
+        ),
+      ),
       body: SafeArea(
         top: false,
         child: LayoutBuilder(
@@ -51,9 +63,12 @@ class PhotoUploadScreen extends StatelessWidget {
                 child: IntrinsicHeight(
                   child: Column(
                     children: [
-                      const SizedBox(height: 126),
-                      const PhotoEmptyPlaceholder(),
-                      const SizedBox(height: 46),
+                      const SizedBox(height: 125),
+                      const Align(
+                        alignment: Alignment(0.04, 0),
+                        child: PhotoEmptyPlaceholder(),
+                      ),
+                      const SizedBox(height: 47),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
@@ -81,10 +96,11 @@ class PhotoUploadScreen extends StatelessWidget {
                         '사진은 공개 피드에 게시되지 않아요.',
                         style: DalmTypography.caption.copyWith(
                           fontSize: 9,
-                          color: DalmColors.textSecondary,
+                          height: 1.2,
+                          color: DalmColors.textWarm,
                         ),
                       ),
-                      const SizedBox(height: 82),
+                      const SizedBox(height: 90),
                     ],
                   ),
                 ),
