@@ -1,5 +1,6 @@
 import 'package:dalm/core/error/network_exception.dart';
 import 'package:dalm/features/auth/data/providers/auth_data_providers.dart';
+import 'package:dalm/features/auth/domain/repositories/apple_auth_repository.dart';
 import 'package:dalm/features/auth/domain/repositories/kakao_auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,9 +9,38 @@ final loginViewModelProvider =
 
 enum KakaoLoginResult { authenticated, cancelled, failed }
 
+enum AppleLoginResult { authorizedOnly, cancelled, failed }
+
 final class LoginViewModel extends Notifier<bool> {
   @override
   bool build() => false;
+
+  Future<AppleLoginResult> loginWithApple() async {
+    // 로그인 중 중복 클릭 방지
+    if (state) return AppleLoginResult.cancelled;
+
+    // 로그인 시작 시 로딩 상태로 전환
+    state = true;
+
+    try {
+      final appleRepository = ref.read(appleAuthRepositoryProvider);
+
+      // Apple 로그인으로 서버 검증용 인증 정보 발급
+      await appleRepository.login();
+
+      // Apple 로그인 API 추가 후 DALM 서버 로그인 연결 필요
+      return AppleLoginResult.authorizedOnly;
+    } on AppleLoginCancelledException {
+      return AppleLoginResult.cancelled;
+    } on AppleLoginFailedException {
+      return AppleLoginResult.failed;
+    } on Object {
+      return AppleLoginResult.failed;
+    } finally {
+      // 로그인 종료 시 로딩 상태 해제
+      state = false;
+    }
+  }
 
   Future<KakaoLoginResult> loginWithKakao() async {
     // 로그인 중 중복 클릭 방지

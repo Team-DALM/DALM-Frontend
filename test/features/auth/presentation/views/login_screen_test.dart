@@ -1,4 +1,6 @@
 import 'package:dalm/features/auth/presentation/views/login_screen.dart';
+import 'package:dalm/features/auth/presentation/widgets/login_apple_button.dart';
+import 'package:dalm/features/auth/presentation/widgets/login_kakao_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,10 +17,42 @@ void main() {
 
     expect(find.text('당신의 하루가\n나란해질 준비를 해요.'), findsOneWidget);
     expect(find.text('카카오로 계속하기'), findsOneWidget);
+    expect(find.text('Apple로 계속하기'), findsNothing);
     expect(find.text('서비스 이용약관'), findsOneWidget);
     expect(find.text('개인정보 처리방침'), findsOneWidget);
     expect(find.text('DAY 1'), findsOneWidget);
     expect(find.text('DAY 7'), findsOneWidget);
+  });
+
+  testWidgets('iOS에서는 카카오 버튼 위에 Apple 로그인 버튼을 표시한다', (tester) async {
+    var wasPressed = false;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: LoginScreen(
+            onApplePressed: () {
+              wasPressed = true;
+            },
+          ),
+        ),
+      ),
+    );
+
+    final appleButton = find.byType(LoginAppleButton);
+    final kakaoButton = find.byType(LoginKakaoButton);
+
+    expect(appleButton, findsOneWidget);
+    expect(
+      tester.getTopLeft(kakaoButton).dy - tester.getBottomLeft(appleButton).dy,
+      11,
+    );
+
+    await tester.ensureVisible(find.text('Apple로 계속하기'));
+    await tester.tap(find.text('Apple로 계속하기'));
+
+    expect(wasPressed, isTrue);
   });
 
   testWidgets('서비스 이용약관을 누르면 링크 콜백을 호출한다', (tester) async {

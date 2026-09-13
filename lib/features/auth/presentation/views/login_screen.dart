@@ -4,6 +4,7 @@ import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/core/config/app_config.dart';
 import 'package:dalm/core/widgets/dalm_overlapping_photos.dart';
 import 'package:dalm/core/widgets/dalm_progress_indicator.dart';
+import 'package:dalm/features/auth/presentation/widgets/login_apple_button.dart';
 import 'package:dalm/features/auth/presentation/widgets/login_kakao_button.dart';
 import 'package:dalm/features/auth/presentation/view_models/login_view_model.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +13,40 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends ConsumerWidget {
-  const LoginScreen({super.key, this.onTermsPressed, this.onPrivacyPressed});
+  const LoginScreen({
+    super.key,
+    this.onApplePressed,
+    this.onTermsPressed,
+    this.onPrivacyPressed,
+  });
 
+  final VoidCallback? onApplePressed;
   final VoidCallback? onTermsPressed;
   final VoidCallback? onPrivacyPressed;
+
+  Future<void> _loginWithApple(BuildContext context, WidgetRef ref) async {
+    if (onApplePressed != null) {
+      onApplePressed!();
+      return;
+    }
+
+    final result = await ref
+        .read(loginViewModelProvider.notifier)
+        .loginWithApple();
+
+    // 로그인 취소 시 안내 없이 기존 화면 유지
+    if (!context.mounted || result == AppleLoginResult.cancelled) return;
+
+    final message = switch (result) {
+      AppleLoginResult.authorizedOnly =>
+        'Apple 인증은 완료됐지만 서버 API가 아직 준비되지 않았어요.',
+      AppleLoginResult.failed => 'Apple 로그인에 실패했어요. 다시 시도해주세요.',
+      AppleLoginResult.cancelled => '',
+    };
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
 
   Future<void> _loginWithKakao(BuildContext context, WidgetRef ref) async {
     final result = await ref
@@ -63,6 +94,7 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoginLoading = ref.watch(loginViewModelProvider);
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
 
     return Scaffold(
       body: SafeArea(
@@ -117,6 +149,16 @@ class LoginScreen extends ConsumerWidget {
                         child: DalmProgressIndicator.daily(currentDay: 7),
                       ),
                       const Spacer(),
+                      if (isIOS) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 28),
+                          child: LoginAppleButton(
+                            isLoading: isLoginLoading,
+                            onPressed: () => _loginWithApple(context, ref),
+                          ),
+                        ),
+                        const SizedBox(height: 11),
+                      ],
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 28),
                         child: LoginKakaoButton(
