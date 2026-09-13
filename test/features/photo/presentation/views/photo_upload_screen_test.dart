@@ -37,4 +37,18 @@ void main() {
     expect(cameraPressed, isTrue);
     expect(galleryPressed, isTrue);
   });
+
+  testWidgets('앨범 선택 시 사진 접근 권한 안내를 표시한다', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: DalmTheme.light, home: const PhotoUploadScreen()),
+    );
+
+    await tester.tap(find.text('앨범에서 선택하기'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('사진 접근 권한이 필요해요'), findsOneWidget);
+    expect(find.text('모든 사진 허용'), findsOneWidget);
+    expect(find.text('선택한 사진만 허용'), findsOneWidget);
+    expect(find.text('지금은 허용하지 않기'), findsOneWidget);
+  });
 }

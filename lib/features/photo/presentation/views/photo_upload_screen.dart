@@ -2,6 +2,7 @@ import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_empty_placeholder.dart';
+import 'package:dalm/features/photo/presentation/widgets/photo_permission_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_source_action_card.dart';
 import 'package:flutter/material.dart';
 
@@ -10,10 +11,31 @@ class PhotoUploadScreen extends StatelessWidget {
     super.key,
     this.onCameraPressed,
     this.onGalleryPressed,
+    this.onAllowAllPhotos,
+    this.onAllowSelectedPhotos,
+    this.onDenyPhotoPermission,
   });
 
   final VoidCallback? onCameraPressed;
   final VoidCallback? onGalleryPressed;
+  final VoidCallback? onAllowAllPhotos;
+  final VoidCallback? onAllowSelectedPhotos;
+  final VoidCallback? onDenyPhotoPermission;
+
+  Future<void> _openGallery(BuildContext context) async {
+    if (onGalleryPressed != null) {
+      onGalleryPressed!();
+      return;
+    }
+
+    // 앨범 접근 전 사용자에게 권한 사용 목적 안내
+    await PhotoPermissionDialog.show(
+      context,
+      onAllowAll: onAllowAllPhotos ?? () {},
+      onAllowSelected: onAllowSelectedPhotos ?? () {},
+      onDeny: onDenyPhotoPermission ?? () {},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +71,7 @@ class PhotoUploadScreen extends StatelessWidget {
                               iconBackgroundColor: DalmColors.secondaryAction,
                               title: '앨범에서 선택하기',
                               description: '최근 사진에서 한 장을 골라요.',
-                              onPressed: onGalleryPressed ?? () {},
+                              onPressed: () => _openGallery(context),
                             ),
                           ],
                         ),
