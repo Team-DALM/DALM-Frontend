@@ -1,13 +1,18 @@
+import 'dart:async';
+
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
+import 'package:dalm/features/photo/presentation/view_models/photo_camera_view_model.dart';
 import 'package:dalm/features/photo/presentation/widgets/camera_permission_dialog.dart';
+import 'package:dalm/features/photo/presentation/widgets/camera_settings_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_empty_placeholder.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_permission_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_source_action_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PhotoUploadScreen extends StatelessWidget {
+class PhotoUploadScreen extends ConsumerWidget {
   const PhotoUploadScreen({
     super.key,
     this.onCameraPressed,
@@ -17,6 +22,7 @@ class PhotoUploadScreen extends StatelessWidget {
     this.onDenyPhotoPermission,
     this.onAllowCamera,
     this.onDenyCameraPermission,
+    this.onPhotoCaptured,
   });
 
   final VoidCallback? onCameraPressed;
@@ -26,8 +32,9 @@ class PhotoUploadScreen extends StatelessWidget {
   final VoidCallback? onDenyPhotoPermission;
   final VoidCallback? onAllowCamera;
   final VoidCallback? onDenyCameraPermission;
+  final ValueChanged<String>? onPhotoCaptured;
 
-  Future<void> _openCamera(BuildContext context) async {
+  Future<void> _openCamera(BuildContext context, WidgetRef ref) async {
     if (onCameraPressed != null) {
       onCameraPressed!();
       return;
@@ -36,9 +43,56 @@ class PhotoUploadScreen extends StatelessWidget {
     // 카메라 실행 전 사용자에게 권한 사용 목적 안내
     await CameraPermissionDialog.show(
       context,
-      onAllow: onAllowCamera ?? () {},
+      onAllow:
+          onAllowCamera ??
+          () {
+            unawaited(_requestPermissionAndTakePhoto(context, ref));
+          },
       onDeny: onDenyCameraPermission ?? () {},
     );
+  }
+
+  Future<void> _requestPermissionAndTakePhoto(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final viewModel = ref.read(photoCameraViewModelProvider);
+    final result = await viewModel.requestPermissionAndTakePhoto();
+
+    if (!context.mounted) {
+      return;
+    }
+
+    switch (result.outcome) {
+      case PhotoCameraCaptureOutcome.captured:
+        onPhotoCaptured?.call(result.photoPath!);
+        return;
+      case PhotoCameraCaptureOutcome.cancelled:
+        return;
+      case PhotoCameraCaptureOutcome.permissionDenied:
+        _showMessage(context, '카메라 권한이 허용되지 않았어요.');
+        return;
+      case PhotoCameraCaptureOutcome.permissionPermanentlyDenied:
+        await CameraSettingsDialog.show(
+          context,
+          onOpenSettings: () {
+            unawaited(viewModel.openSettings());
+          },
+        );
+        return;
+      case PhotoCameraCaptureOutcome.permissionRestricted:
+        _showMessage(context, '이 기기에서는 카메라 권한을 변경할 수 없어요.');
+        return;
+      case PhotoCameraCaptureOutcome.failed:
+        _showMessage(context, '카메라를 열지 못했어요. 잠시 후 다시 시도해 주세요.');
+        return;
+    }
+  }
+
+  void _showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _openGallery(BuildContext context) async {
@@ -57,7 +111,7 @@ class PhotoUploadScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: const DalmAppBar(
         title: '오늘의 사진',
@@ -97,7 +151,7 @@ class PhotoUploadScreen extends StatelessWidget {
                               iconBackgroundColor: DalmColors.primaryAction,
                               title: '카메라로 촬영하기',
                               description: '지금 마주한 장면을 바로 남겨요.',
-                              onPressed: () => _openCamera(context),
+                              onPressed: () => _openCamera(context, ref),
                             ),
                             const SizedBox(height: 12),
                             PhotoSourceActionCard(
