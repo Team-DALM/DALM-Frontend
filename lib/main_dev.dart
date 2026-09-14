@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 import 'app/app.dart';
+import 'core/config/app_config.dart';
 import 'features/home/data/providers/home_data_providers.dart';
 import 'features/home/domain/entities/home_overview.dart';
 import 'features/home/domain/entities/home_recent_match.dart';
@@ -21,6 +23,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: '.env');
+  await KakaoSdk.init(nativeAppKey: AppConfig.kakaoNativeAppKey);
 
   runApp(
     ProviderScope(

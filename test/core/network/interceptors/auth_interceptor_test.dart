@@ -20,8 +20,8 @@ void main() {
         refreshToken: 'valid-refresh-token',
       );
 
-      dio = Dio(BaseOptions(baseUrl: 'https://example.com/v1'));
-      refreshDio = Dio(BaseOptions(baseUrl: 'https://example.com/v1'));
+      dio = Dio(BaseOptions(baseUrl: 'https://example.com/v1/'));
+      refreshDio = Dio(BaseOptions(baseUrl: 'https://example.com/v1/'));
 
       final tokenRefresher = TokenRefresher(
         dio: refreshDio,
@@ -49,7 +49,7 @@ void main() {
       refreshDio.httpClientAdapter = _FakeHttpClientAdapter((options) {
         refreshCallCount++;
 
-        expect(options.path, '/auth/refresh');
+        expect(options.uri.path, '/v1/auth/refresh');
         expect(options.data, {'refresh_token': 'valid-refresh-token'});
 
         return _jsonResponse(200, {
