@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
+import 'package:dalm/features/photo/domain/entities/photo_camera_permission_status.dart';
 import 'package:dalm/features/photo/presentation/view_models/photo_camera_view_model.dart';
 import 'package:dalm/features/photo/presentation/widgets/camera_permission_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/camera_settings_dialog.dart';
@@ -40,6 +41,43 @@ class PhotoUploadScreen extends ConsumerWidget {
       return;
     }
 
+    final viewModel = ref.read(photoCameraViewModelProvider);
+    late final PhotoCameraPermissionStatus permission;
+
+    try {
+      permission = await viewModel.checkPermission();
+    } catch (_) {
+      if (context.mounted) {
+        _showMessage(context, '카메라 권한을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.');
+      }
+      return;
+    }
+
+    if (!context.mounted) {
+      return;
+    }
+
+    switch (permission) {
+      case PhotoCameraPermissionStatus.granted:
+        final result = await viewModel.takePhoto();
+        if (context.mounted) {
+          await _handleCameraResult(context, viewModel, result);
+        }
+        return;
+      case PhotoCameraPermissionStatus.permanentlyDenied:
+        await _showCameraSettingsDialog(context, viewModel);
+        return;
+      case PhotoCameraPermissionStatus.restricted:
+        _showMessage(context, '이 기기에서는 카메라 권한을 변경할 수 없어요.');
+        return;
+      case PhotoCameraPermissionStatus.denied:
+        break;
+    }
+
+    if (!context.mounted) {
+      return;
+    }
+
     // 카메라 실행 전 사용자에게 권한 사용 목적 안내
     await CameraPermissionDialog.show(
       context,
@@ -63,6 +101,14 @@ class PhotoUploadScreen extends ConsumerWidget {
       return;
     }
 
+    await _handleCameraResult(context, viewModel, result);
+  }
+
+  Future<void> _handleCameraResult(
+    BuildContext context,
+    PhotoCameraViewModel viewModel,
+    PhotoCameraCaptureResult result,
+  ) async {
     switch (result.outcome) {
       case PhotoCameraCaptureOutcome.captured:
         onPhotoCaptured?.call(result.photoPath!);
@@ -73,12 +119,7 @@ class PhotoUploadScreen extends ConsumerWidget {
         _showMessage(context, '카메라 권한이 허용되지 않았어요.');
         return;
       case PhotoCameraCaptureOutcome.permissionPermanentlyDenied:
-        await CameraSettingsDialog.show(
-          context,
-          onOpenSettings: () {
-            unawaited(viewModel.openSettings());
-          },
-        );
+        await _showCameraSettingsDialog(context, viewModel);
         return;
       case PhotoCameraCaptureOutcome.permissionRestricted:
         _showMessage(context, '이 기기에서는 카메라 권한을 변경할 수 없어요.');
@@ -87,6 +128,18 @@ class PhotoUploadScreen extends ConsumerWidget {
         _showMessage(context, '카메라를 열지 못했어요. 잠시 후 다시 시도해 주세요.');
         return;
     }
+  }
+
+  Future<void> _showCameraSettingsDialog(
+    BuildContext context,
+    PhotoCameraViewModel viewModel,
+  ) {
+    return CameraSettingsDialog.show(
+      context,
+      onOpenSettings: () {
+        unawaited(viewModel.openSettings());
+      },
+    );
   }
 
   void _showMessage(BuildContext context, String message) {

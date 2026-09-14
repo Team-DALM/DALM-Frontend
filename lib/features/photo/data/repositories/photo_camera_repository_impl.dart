@@ -10,9 +10,16 @@ final class PhotoCameraRepositoryImpl implements PhotoCameraRepository {
   final PhotoCameraDataSource _dataSource;
 
   @override
-  Future<PhotoCameraPermissionStatus> requestPermission() async {
-    final status = await _dataSource.requestPermission();
+  Future<PhotoCameraPermissionStatus> checkPermission() async {
+    return _mapPermissionStatus(await _dataSource.checkPermission());
+  }
 
+  @override
+  Future<PhotoCameraPermissionStatus> requestPermission() async {
+    return _mapPermissionStatus(await _dataSource.requestPermission());
+  }
+
+  PhotoCameraPermissionStatus _mapPermissionStatus(PermissionStatus status) {
     if (status.isGranted) {
       return PhotoCameraPermissionStatus.granted;
     }

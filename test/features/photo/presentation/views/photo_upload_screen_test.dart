@@ -71,8 +71,15 @@ void main() {
   });
 
   testWidgets('카메라 선택 시 카메라 접근 권한 안내를 표시한다', (tester) async {
+    final repository = _FakePhotoCameraRepository(
+      permissionStatus: PhotoCameraPermissionStatus.denied,
+    );
+
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [
+          photoCameraRepositoryProvider.overrideWithValue(repository),
+        ],
         child: MaterialApp(
           theme: DalmTheme.light,
           home: const PhotoUploadScreen(),
@@ -119,6 +126,33 @@ void main() {
     expect(capturedPhotoPath, '/tmp/today-photo.jpg');
   });
 
+  testWidgets('카메라 권한이 이미 있으면 안내 없이 바로 촬영한다', (tester) async {
+    final repository = _FakePhotoCameraRepository(
+      currentPermissionStatus: PhotoCameraPermissionStatus.granted,
+      permissionStatus: PhotoCameraPermissionStatus.granted,
+      photoPath: '/tmp/today-photo.jpg',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          photoCameraRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          theme: DalmTheme.light,
+          home: const PhotoUploadScreen(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('카메라로 촬영하기'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('카메라 사용 권한이 필요해요'), findsNothing);
+    expect(repository.permissionRequestCount, 0);
+    expect(repository.takePhotoCount, 1);
+  });
+
   testWidgets('카메라 권한이 영구 거부되면 설정 이동을 안내한다', (tester) async {
     final repository = _FakePhotoCameraRepository(
       permissionStatus: PhotoCameraPermissionStatus.permanentlyDenied,
@@ -160,14 +194,24 @@ void main() {
 }
 
 final class _FakePhotoCameraRepository implements PhotoCameraRepository {
-  _FakePhotoCameraRepository({required this.permissionStatus, this.photoPath});
+  _FakePhotoCameraRepository({
+    required this.permissionStatus,
+    this.currentPermissionStatus = PhotoCameraPermissionStatus.denied,
+    this.photoPath,
+  });
 
   final PhotoCameraPermissionStatus permissionStatus;
+  final PhotoCameraPermissionStatus currentPermissionStatus;
   final String? photoPath;
 
   int permissionRequestCount = 0;
   int takePhotoCount = 0;
   int openSettingsCount = 0;
+
+  @override
+  Future<PhotoCameraPermissionStatus> checkPermission() async {
+    return currentPermissionStatus;
+  }
 
   @override
   Future<PhotoCameraPermissionStatus> requestPermission() async {

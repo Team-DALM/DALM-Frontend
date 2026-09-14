@@ -2,6 +2,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 abstract interface class PhotoCameraDataSource {
+  Future<PermissionStatus> checkPermission();
+
   Future<PermissionStatus> requestPermission();
 
   Future<XFile?> takePhoto();
@@ -14,6 +16,11 @@ final class DevicePhotoCameraDataSource implements PhotoCameraDataSource {
     : _imagePicker = imagePicker ?? ImagePicker();
 
   final ImagePicker _imagePicker;
+
+  @override
+  Future<PermissionStatus> checkPermission() {
+    return Permission.camera.status;
+  }
 
   @override
   Future<PermissionStatus> requestPermission() {

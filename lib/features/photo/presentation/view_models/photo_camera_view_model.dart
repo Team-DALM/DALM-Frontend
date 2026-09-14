@@ -29,6 +29,10 @@ final class PhotoCameraViewModel {
 
   final PhotoCameraRepository _repository;
 
+  Future<PhotoCameraPermissionStatus> checkPermission() {
+    return _repository.checkPermission();
+  }
+
   Future<PhotoCameraCaptureResult> requestPermissionAndTakePhoto() async {
     try {
       final permission = await _repository.requestPermission();
@@ -47,22 +51,34 @@ final class PhotoCameraViewModel {
             PhotoCameraCaptureOutcome.permissionRestricted,
           );
         case PhotoCameraPermissionStatus.granted:
-          final photoPath = await _repository.takePhoto();
-
-          if (photoPath == null) {
-            return const PhotoCameraCaptureResult(
-              PhotoCameraCaptureOutcome.cancelled,
-            );
-          }
-
-          return PhotoCameraCaptureResult(
-            PhotoCameraCaptureOutcome.captured,
-            photoPath: photoPath,
-          );
+          return await _takePhoto();
       }
     } catch (_) {
       return const PhotoCameraCaptureResult(PhotoCameraCaptureOutcome.failed);
     }
+  }
+
+  Future<PhotoCameraCaptureResult> takePhoto() async {
+    try {
+      return await _takePhoto();
+    } catch (_) {
+      return const PhotoCameraCaptureResult(PhotoCameraCaptureOutcome.failed);
+    }
+  }
+
+  Future<PhotoCameraCaptureResult> _takePhoto() async {
+    final photoPath = await _repository.takePhoto();
+
+    if (photoPath == null) {
+      return const PhotoCameraCaptureResult(
+        PhotoCameraCaptureOutcome.cancelled,
+      );
+    }
+
+    return PhotoCameraCaptureResult(
+      PhotoCameraCaptureOutcome.captured,
+      photoPath: photoPath,
+    );
   }
 
   Future<bool> openSettings() {

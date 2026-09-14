@@ -68,6 +68,11 @@ final class _FakePhotoCameraRepository implements PhotoCameraRepository {
   int takePhotoCount = 0;
 
   @override
+  Future<PhotoCameraPermissionStatus> checkPermission() async {
+    return permissionStatus;
+  }
+
+  @override
   Future<PhotoCameraPermissionStatus> requestPermission() async {
     return permissionStatus;
   }
