@@ -78,7 +78,8 @@ class LoginScreen extends ConsumerWidget {
     }
 
     try {
-      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      // 앱을 유지한 채 인앱 브라우저로 약관 열기
+      if (await launchUrl(uri, mode: LaunchMode.inAppBrowserView)) {
         return;
       }
     } on Exception {
