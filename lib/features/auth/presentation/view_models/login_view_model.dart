@@ -9,7 +9,7 @@ final loginViewModelProvider =
 
 enum KakaoLoginResult { authenticated, cancelled, failed }
 
-enum AppleLoginResult { authorizedOnly, cancelled, failed }
+enum AppleLoginResult { authenticated, cancelled, failed }
 
 final class LoginViewModel extends Notifier<bool> {
   @override
@@ -24,15 +24,26 @@ final class LoginViewModel extends Notifier<bool> {
 
     try {
       final appleRepository = ref.read(appleAuthRepositoryProvider);
+      final authRepository = ref.read(authRepositoryProvider);
 
-      // Apple 로그인으로 서버 검증용 인증 정보 발급
-      await appleRepository.login();
+      // Apple 인증 정보 발급
+      final credential = await appleRepository.login();
 
-      // Apple 로그인 API 추가 후 DALM 서버 로그인 연결 필요
-      return AppleLoginResult.authorizedOnly;
+      // identityToken 누락 확인
+      final identityToken = credential.identityToken;
+      if (identityToken == null || identityToken.isEmpty) {
+        throw const AppleLoginFailedException();
+      }
+
+      // identityToken으로 DALM 서버 로그인
+      await authRepository.loginWithApple(identityToken);
+
+      return AppleLoginResult.authenticated;
     } on AppleLoginCancelledException {
       return AppleLoginResult.cancelled;
     } on AppleLoginFailedException {
+      return AppleLoginResult.failed;
+    } on NetworkException {
       return AppleLoginResult.failed;
     } on Object {
       return AppleLoginResult.failed;

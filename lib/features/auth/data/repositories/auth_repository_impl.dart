@@ -9,13 +9,25 @@ final class AuthRepositoryImpl implements AuthRepository {
   final TokenStorage _tokenStorage;
 
   @override
+  Future<void> loginWithApple(String identityToken) async {
+    final tokens = await _remoteDataSource.loginWithApple(identityToken);
+
+    // 백엔드에서 발급한 DALM 토큰 저장
+    await _saveTokens(tokens.accessToken, tokens.refreshToken);
+  }
+
+  @override
   Future<void> loginWithKakao(String kakaoAccessToken) async {
     final tokens = await _remoteDataSource.loginWithKakao(kakaoAccessToken);
 
     // 백엔드에서 발급한 DALM 토큰 저장
+    await _saveTokens(tokens.accessToken, tokens.refreshToken);
+  }
+
+  Future<void> _saveTokens(String accessToken, String refreshToken) async {
     await _tokenStorage.saveTokens(
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     );
   }
 }

@@ -6,6 +6,8 @@ import '../../../../core/network/execute_api_call.dart';
 import '../../../../core/network/interceptors/auth_interceptor.dart';
 
 abstract interface class AuthRemoteDataSource {
+  Future<TokenPairDto> loginWithApple(String identityToken);
+
   Future<TokenPairDto> loginWithKakao(String kakaoAccessToken);
 }
 
@@ -15,12 +17,25 @@ final class DioAuthRemoteDataSource implements AuthRemoteDataSource {
   final Dio _dio;
 
   @override
+  Future<TokenPairDto> loginWithApple(String identityToken) {
+    // Apple identityToken을 DALM 로그인 API로 전달
+    return _login(path: 'auth/apple', data: {'identity_token': identityToken});
+  }
+
+  @override
   Future<TokenPairDto> loginWithKakao(String kakaoAccessToken) {
+    // 카카오 액세스 토큰을 DALM 로그인 API로 전달
+    return _login(path: 'auth/kakao', data: {'access_token': kakaoAccessToken});
+  }
+
+  Future<TokenPairDto> _login({
+    required String path,
+    required Map<String, String> data,
+  }) {
     return executeApiCall(() async {
-      // 카카오 액세스 토큰을 DALM 로그인 API로 전달
       final response = await _dio.post<Map<String, dynamic>>(
-        'auth/kakao',
-        data: {'access_token': kakaoAccessToken},
+        path,
+        data: data,
         options: Options(extra: const {AuthInterceptor.requiresAuthKey: false}),
       );
 

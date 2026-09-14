@@ -9,7 +9,7 @@ final class AppleAuthRepositoryImpl implements AppleAuthRepository {
         throw const AppleLoginFailedException();
       }
 
-      // Apple 로그인 화면에서 이메일과 이름 사용 권한 요청
+      // Apple 로그인 화면 호출
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: const [
           AppleIDAuthorizationScopes.email,
@@ -17,7 +17,7 @@ final class AppleAuthRepositoryImpl implements AppleAuthRepository {
         ],
       );
 
-      // 백엔드 검증에 사용할 Apple 인증 정보 반환
+      // Apple 인증 정보 반환
       return AppleLoginCredential(
         authorizationCode: credential.authorizationCode,
         userIdentifier: credential.userIdentifier,

@@ -37,15 +37,15 @@ class LoginScreen extends ConsumerWidget {
     // 로그인 취소 시 안내 없이 기존 화면 유지
     if (!context.mounted || result == AppleLoginResult.cancelled) return;
 
-    final message = switch (result) {
-      AppleLoginResult.authorizedOnly =>
-        'Apple 인증은 완료됐지만 서버 API가 아직 준비되지 않았어요.',
-      AppleLoginResult.failed => 'Apple 로그인에 실패했어요. 다시 시도해주세요.',
-      AppleLoginResult.cancelled => '',
-    };
+    if (result == AppleLoginResult.authenticated) {
+      // 로그인 성공 시 홈 화면으로 이동
+      context.go(AppRoutes.home);
+      return;
+    }
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Apple 로그인에 실패했어요. 다시 시도해주세요.')),
+    );
   }
 
   Future<void> _loginWithKakao(BuildContext context, WidgetRef ref) async {
@@ -94,6 +94,7 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoginLoading = ref.watch(loginViewModelProvider);
+    // iOS 운영체제 확인
     final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
 
     return Scaffold(
@@ -149,6 +150,7 @@ class LoginScreen extends ConsumerWidget {
                         child: DalmProgressIndicator.daily(currentDay: 7),
                       ),
                       const Spacer(),
+                      // iOS에서만 Apple 로그인 버튼 표시
                       if (isIOS) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 28),

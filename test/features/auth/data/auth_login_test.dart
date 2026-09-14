@@ -10,6 +10,26 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('Apple identityToken을 서버에 전달하고 DALM 토큰을 파싱한다', () async {
+    final dio = Dio(BaseOptions(baseUrl: 'https://example.com/v1/'));
+
+    dio.httpClientAdapter = _FakeHttpClientAdapter((options) {
+      expect(options.method, 'POST');
+      expect(options.uri.path, '/v1/auth/apple');
+      expect(options.data, {'identity_token': 'apple-identity-token'});
+
+      return _loginResponse();
+    });
+
+    final dataSource = DioAuthRemoteDataSource(dio);
+    final tokens = await dataSource.loginWithApple('apple-identity-token');
+
+    expect(tokens.accessToken, 'dalm-access-token');
+    expect(tokens.refreshToken, 'dalm-refresh-token');
+
+    dio.close(force: true);
+  });
+
   test('카카오 액세스 토큰을 서버에 전달하고 DALM 토큰을 파싱한다', () async {
     final dio = Dio(BaseOptions(baseUrl: 'https://example.com/v1/'));
 
@@ -18,20 +38,7 @@ void main() {
       expect(options.uri.path, '/v1/auth/kakao');
       expect(options.data, {'access_token': 'kakao-access-token'});
 
-      return _jsonResponse(201, {
-        'data': {
-          'is_new_user': true,
-          'onboarding_required': true,
-          'tokens': {
-            'access_token': 'dalm-access-token',
-            'refresh_token': 'dalm-refresh-token',
-            'token_type': 'Bearer',
-            'expires_in': 3600,
-          },
-          'user': {'id': 'user-id', 'nickname': null, 'status': 'ACTIVE'},
-        },
-        'error': null,
-      });
+      return _loginResponse();
     });
 
     final dataSource = DioAuthRemoteDataSource(dio);
@@ -52,6 +59,19 @@ void main() {
     );
 
     await repository.loginWithKakao('kakao-access-token');
+
+    expect(tokenStorage.accessToken, 'dalm-access-token');
+    expect(tokenStorage.refreshToken, 'dalm-refresh-token');
+  });
+
+  test('Apple 서버 로그인 성공 시 백엔드에서 발급한 토큰을 저장한다', () async {
+    final tokenStorage = _MemoryTokenStorage();
+    final repository = AuthRepositoryImpl(
+      _FakeAuthRemoteDataSource(),
+      tokenStorage,
+    );
+
+    await repository.loginWithApple('apple-identity-token');
 
     expect(tokenStorage.accessToken, 'dalm-access-token');
     expect(tokenStorage.refreshToken, 'dalm-refresh-token');
@@ -82,6 +102,16 @@ final class _FakeHttpClientAdapter implements HttpClientAdapter {
 
 final class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   @override
+  Future<TokenPairDto> loginWithApple(String identityToken) async {
+    expect(identityToken, 'apple-identity-token');
+
+    return const TokenPairDto(
+      accessToken: 'dalm-access-token',
+      refreshToken: 'dalm-refresh-token',
+    );
+  }
+
+  @override
   Future<TokenPairDto> loginWithKakao(String kakaoAccessToken) async {
     expect(kakaoAccessToken, 'kakao-access-token');
 
@@ -90,6 +120,23 @@ final class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
       refreshToken: 'dalm-refresh-token',
     );
   }
+}
+
+ResponseBody _loginResponse() {
+  return _jsonResponse(201, {
+    'data': {
+      'is_new_user': true,
+      'onboarding_required': true,
+      'tokens': {
+        'access_token': 'dalm-access-token',
+        'refresh_token': 'dalm-refresh-token',
+        'token_type': 'Bearer',
+        'expires_in': 3600,
+      },
+      'user': {'id': 'user-id', 'nickname': null, 'status': 'ACTIVE'},
+    },
+    'error': null,
+  });
 }
 
 final class _MemoryTokenStorage implements TokenStorage {
