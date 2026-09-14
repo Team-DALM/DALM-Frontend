@@ -14,6 +14,7 @@ class DalmPhotoPair extends StatelessWidget {
     required this.status,
     this.rightImage,
     this.hiddenLabel = '아직 가려진\n낯선 사람의 장면',
+    this.imageAspectRatio = _defaultImageAspectRatio,
   }) : assert(
          status == DalmPhotoPairStatus.searching || rightImage != null,
          'hidden 또는 revealed 상태에서는 오른쪽 이미지가 필요합니다.',
@@ -23,8 +24,9 @@ class DalmPhotoPair extends StatelessWidget {
   final ImageProvider? rightImage;
   final DalmPhotoPairStatus status;
   final String hiddenLabel;
+  final double imageAspectRatio;
 
-  static const double _imageAspectRatio = 3 / 4; // 사진 가로, 세로 비율
+  static const double _defaultImageAspectRatio = 3 / 4; // 사진 가로, 세로 비율
   static const double _gap = 8;
   static const double _borderRadius = 6;
   static const double _connectorWidth = 14;
@@ -77,7 +79,7 @@ class DalmPhotoPair extends StatelessWidget {
 
   Widget _buildFrame(Widget child) {
     return AspectRatio(
-      aspectRatio: _imageAspectRatio,
+      aspectRatio: imageAspectRatio,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(_borderRadius),
         child: child,
