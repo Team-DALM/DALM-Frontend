@@ -1,7 +1,10 @@
 import 'package:dalm/app/theme/dalm_theme.dart';
 import 'package:dalm/features/photo/data/providers/photo_camera_providers.dart';
+import 'package:dalm/features/photo/data/providers/photo_library_providers.dart';
 import 'package:dalm/features/photo/domain/entities/photo_camera_permission_status.dart';
+import 'package:dalm/features/photo/domain/entities/photo_library_permission_status.dart';
 import 'package:dalm/features/photo/domain/repositories/photo_camera_repository.dart';
+import 'package:dalm/features/photo/domain/repositories/photo_library_repository.dart';
 import 'package:dalm/features/photo/presentation/views/photo_upload_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,8 +54,13 @@ void main() {
   });
 
   testWidgets('앨범 선택 시 사진 접근 권한 안내를 표시한다', (tester) async {
+    final repository = _FakePhotoLibraryRepository();
+
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [
+          photoLibraryRepositoryProvider.overrideWithValue(repository),
+        ],
         child: MaterialApp(
           theme: DalmTheme.light,
           home: const PhotoUploadScreen(),
@@ -68,6 +76,92 @@ void main() {
     expect(find.text('모든 사진 허용'), findsOneWidget);
     expect(find.text('선택한 사진만 허용'), findsOneWidget);
     expect(find.text('지금은 허용하지 않기'), findsOneWidget);
+  });
+
+  testWidgets('선택한 사진만 허용하면 권한 요청 없이 사진 선택기를 연다', (tester) async {
+    final repository = _FakePhotoLibraryRepository(
+      photoPath: '/tmp/selected-photo.jpg',
+    );
+    String? selectedPath;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          photoLibraryRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          theme: DalmTheme.light,
+          home: PhotoUploadScreen(
+            onPhotoSelected: (path) => selectedPath = path,
+          ),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.text('앨범에서 선택하기'));
+    await tester.tap(find.text('앨범에서 선택하기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('선택한 사진만 허용'));
+    await tester.pumpAndSettle();
+
+    expect(repository.permissionRequestCount, 0);
+    expect(repository.selectPhotoCount, 1);
+    expect(selectedPath, '/tmp/selected-photo.jpg');
+  });
+
+  testWidgets('모든 사진 허용은 권한을 요청한 뒤 사진 선택기를 연다', (tester) async {
+    final repository = _FakePhotoLibraryRepository(
+      requestedPermission: PhotoLibraryPermissionStatus.granted,
+      photoPath: '/tmp/all-photo.jpg',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          photoLibraryRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          theme: DalmTheme.light,
+          home: const PhotoUploadScreen(),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.text('앨범에서 선택하기'));
+    await tester.tap(find.text('앨범에서 선택하기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('모든 사진 허용'));
+    await tester.pumpAndSettle();
+
+    expect(repository.permissionRequestCount, 1);
+    expect(repository.selectPhotoCount, 1);
+  });
+
+  testWidgets('사진 권한이 이미 있으면 안내 없이 사진 선택기를 연다', (tester) async {
+    final repository = _FakePhotoLibraryRepository(
+      currentPermission: PhotoLibraryPermissionStatus.granted,
+      photoPath: '/tmp/existing-photo.jpg',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          photoLibraryRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          theme: DalmTheme.light,
+          home: const PhotoUploadScreen(),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.text('앨범에서 선택하기'));
+    await tester.tap(find.text('앨범에서 선택하기'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('사진 접근 권한이 필요해요'), findsNothing);
+    expect(repository.permissionRequestCount, 0);
+    expect(repository.selectPhotoCount, 1);
   });
 
   testWidgets('카메라 선택 시 카메라 접근 권한 안내를 표시한다', (tester) async {
@@ -230,4 +324,39 @@ final class _FakePhotoCameraRepository implements PhotoCameraRepository {
     openSettingsCount += 1;
     return true;
   }
+}
+
+final class _FakePhotoLibraryRepository implements PhotoLibraryRepository {
+  _FakePhotoLibraryRepository({
+    this.currentPermission = PhotoLibraryPermissionStatus.denied,
+    this.requestedPermission = PhotoLibraryPermissionStatus.granted,
+    this.photoPath,
+  });
+
+  final PhotoLibraryPermissionStatus currentPermission;
+  final PhotoLibraryPermissionStatus requestedPermission;
+  final String? photoPath;
+
+  int permissionRequestCount = 0;
+  int selectPhotoCount = 0;
+
+  @override
+  Future<PhotoLibraryPermissionStatus> checkPermission() async {
+    return currentPermission;
+  }
+
+  @override
+  Future<PhotoLibraryPermissionStatus> requestPermission() async {
+    permissionRequestCount += 1;
+    return requestedPermission;
+  }
+
+  @override
+  Future<String?> selectPhoto() async {
+    selectPhotoCount += 1;
+    return photoPath;
+  }
+
+  @override
+  Future<bool> openSettings() async => true;
 }

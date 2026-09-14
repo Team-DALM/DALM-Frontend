@@ -18,6 +18,8 @@
 	<string>DALM</string>
 	<key>NSCameraUsageDescription</key>
 	<string>오늘의 사진을 촬영하기 위해 카메라를 사용해요.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>오늘의 사진을 선택하기 위해 사진 보관함을 사용해요.</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
