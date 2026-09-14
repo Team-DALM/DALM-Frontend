@@ -71,6 +71,31 @@ void main() {
 
     dio.close(force: true);
   });
+
+  testWidgets('Refresh Token 요청이 잘못되면 토큰을 삭제하고 온보딩으로 이동한다', (tester) async {
+    final tokenStorage = _MemoryTokenStorage(
+      accessToken: 'old-access-token',
+      refreshToken: 'invalid-refresh-token',
+    );
+    final dio = _createRefreshDio((options) {
+      return _jsonResponse(422, {
+        'data': null,
+        'error': {
+          'code': 'VALIDATION_ERROR',
+          'message': 'Refresh Token이 올바르지 않습니다.',
+        },
+      });
+    });
+
+    await _pumpSplash(tester, tokenStorage: tokenStorage, refreshDio: dio);
+
+    expect(find.text('ONBOARDING'), findsOneWidget);
+    expect(tokenStorage.accessToken, isNull);
+    expect(tokenStorage.refreshToken, isNull);
+    expect(tokenStorage.clearCount, 1);
+
+    dio.close(force: true);
+  });
 }
 
 Future<void> _pumpSplash(

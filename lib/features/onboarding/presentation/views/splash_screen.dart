@@ -53,8 +53,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       } on DioException catch (error) {
         final statusCode = error.response?.statusCode;
 
-        if (statusCode == 401 || statusCode == 403) {
-          // 만료된 로그인 토큰 삭제
+        if (statusCode == 400 ||
+            statusCode == 401 ||
+            statusCode == 403 ||
+            statusCode == 422) {
+          // 유효하지 않은 로그인 토큰 삭제
           await tokenStorage.clearTokens();
           return AppRoutes.onboarding;
         }
