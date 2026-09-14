@@ -25,40 +25,94 @@ class OnboardingPageLayout extends StatelessWidget {
   final String description;
 
   static const _defaultVisualHeight = 350.0;
+  static const _referenceHeight = 650.0;
+  static const _minimumScale = 0.75;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 화면 높이에 맞는 비주얼 크기 계산
+        final scale = (constraints.maxHeight / _referenceHeight).clamp(
+          _minimumScale,
+          1.0,
+        );
+        final responsiveVisualHeight = visualHeight * scale;
+
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 84 * scale),
+                SizedBox(
+                  width: double.infinity,
+                  height: responsiveVisualHeight,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      width: constraints.maxWidth,
+                      height: visualHeight,
+                      child: visual,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 21),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: _OnboardingPageText(
+                    title: title,
+                    description: description,
+                    currentDay: currentDay,
+                    showDayProgress: showDayProgress,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _OnboardingPageText extends StatelessWidget {
+  const _OnboardingPageText({
+    required this.title,
+    required this.description,
+    required this.currentDay,
+    required this.showDayProgress,
+  });
+
+  final String title;
+  final String description;
+  final int? currentDay;
+  final bool showDayProgress;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 84),
-        SizedBox(width: double.infinity, height: visualHeight, child: visual),
-        const SizedBox(height: 21),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (showDayProgress) ...[
-                DalmProgressIndicator.daily(currentDay: currentDay!),
-                const SizedBox(height: 24),
-              ],
-              Text(
-                title,
-                style: DalmTypography.serifHeadline.copyWith(
-                  fontSize: 23,
-                  color: DalmColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 13),
-              Text(
-                description,
-                style: DalmTypography.body.copyWith(
-                  fontSize: 13,
-                  color: DalmColors.textSecondary,
-                ),
-              ),
-            ],
+        if (showDayProgress) ...[
+          DalmProgressIndicator.daily(currentDay: currentDay!),
+          const SizedBox(height: 24),
+        ],
+        Text(
+          title,
+          style: DalmTypography.serifHeadline.copyWith(
+            fontSize: 23,
+            color: DalmColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 13),
+        Text(
+          description,
+          style: DalmTypography.body.copyWith(
+            fontSize: 13,
+            color: DalmColors.textSecondary,
           ),
         ),
       ],
