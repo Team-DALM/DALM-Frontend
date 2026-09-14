@@ -43,9 +43,18 @@ class LoginScreen extends ConsumerWidget {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Apple 로그인에 실패했어요. 다시 시도해주세요.')),
-    );
+    // 오류 종류에 맞는 안내 문구 표시
+    final message = switch (result) {
+      AppleLoginResult.retryableFailure => 'Apple 인증에 실패했어요. 다시 시도해주세요.',
+      AppleLoginResult.temporarilyUnavailable =>
+        'Apple 로그인 연결이 원활하지 않아요. 잠시 후 다시 시도해주세요.',
+      AppleLoginResult.unavailable => '현재 Apple 로그인을 이용할 수 없어요.',
+      AppleLoginResult.failed => 'Apple 로그인에 실패했어요. 다시 시도해주세요.',
+      AppleLoginResult.authenticated || AppleLoginResult.cancelled => '',
+    };
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _loginWithKakao(BuildContext context, WidgetRef ref) async {
@@ -62,9 +71,16 @@ class LoginScreen extends ConsumerWidget {
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('카카오 로그인에 실패했어요. 다시 시도해주세요.')));
+    // 오류 종류에 맞는 안내 문구 표시
+    final message = switch (result) {
+      KakaoLoginResult.accountRestricted => '현재 이용이 제한된 계정이에요.',
+      KakaoLoginResult.accountWithdrawn => '탈퇴 처리된 계정이에요.',
+      KakaoLoginResult.failed => '카카오 로그인에 실패했어요. 다시 시도해주세요.',
+      KakaoLoginResult.authenticated || KakaoLoginResult.cancelled => '',
+    };
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _openExternalLink(

@@ -7,9 +7,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final loginViewModelProvider =
     NotifierProvider.autoDispose<LoginViewModel, bool>(LoginViewModel.new);
 
-enum KakaoLoginResult { authenticated, cancelled, failed }
+enum KakaoLoginResult {
+  authenticated,
+  cancelled,
+  accountRestricted,
+  accountWithdrawn,
+  failed,
+}
 
-enum AppleLoginResult { authenticated, cancelled, failed }
+enum AppleLoginResult {
+  authenticated,
+  cancelled,
+  retryableFailure,
+  temporarilyUnavailable,
+  unavailable,
+  failed,
+}
 
 final class LoginViewModel extends Notifier<bool> {
   @override
@@ -43,8 +56,17 @@ final class LoginViewModel extends Notifier<bool> {
       return AppleLoginResult.cancelled;
     } on AppleLoginFailedException {
       return AppleLoginResult.failed;
-    } on NetworkException {
-      return AppleLoginResult.failed;
+    } on NetworkException catch (error) {
+      // 서버 오류 코드에 맞는 로그인 결과 반환
+      return switch (error.code) {
+        'AUTHENTICATION_FAILED' => AppleLoginResult.retryableFailure,
+        'APPLE_API_UNAVAILABLE' => AppleLoginResult.temporarilyUnavailable,
+        'ACCOUNT_RESTRICTED' ||
+        'ACCOUNT_WITHDRAWN' ||
+        'APPLE_LOGIN_NOT_CONFIGURED' => AppleLoginResult.unavailable,
+        _ when error.statusCode == 422 => AppleLoginResult.retryableFailure,
+        _ => AppleLoginResult.failed,
+      };
     } on Object {
       return AppleLoginResult.failed;
     } finally {
@@ -75,8 +97,13 @@ final class LoginViewModel extends Notifier<bool> {
       return KakaoLoginResult.cancelled;
     } on KakaoLoginFailedException {
       return KakaoLoginResult.failed;
-    } on NetworkException {
-      return KakaoLoginResult.failed;
+    } on NetworkException catch (error) {
+      // 서버 오류 코드에 맞는 로그인 결과 반환
+      return switch (error.code) {
+        'ACCOUNT_RESTRICTED' => KakaoLoginResult.accountRestricted,
+        'ACCOUNT_WITHDRAWN' => KakaoLoginResult.accountWithdrawn,
+        _ => KakaoLoginResult.failed,
+      };
     } on Object {
       return KakaoLoginResult.failed;
     } finally {
