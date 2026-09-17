@@ -19,4 +19,5 @@ abstract final class DalmPalette {
   static const coral = Color(0xFFE98B72);
   static const sage = Color(0xFF728B7A);
   static const kakaoYellow = Color(0xFFFEE500);
+  static const kakaoText = Color(0xD9000000);
 }
