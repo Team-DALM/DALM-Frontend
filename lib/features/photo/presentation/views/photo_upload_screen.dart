@@ -4,14 +4,11 @@ import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
 import 'package:dalm/features/photo/domain/entities/photo_camera_permission_status.dart';
-import 'package:dalm/features/photo/domain/entities/photo_library_permission_status.dart';
 import 'package:dalm/features/photo/presentation/view_models/photo_camera_view_model.dart';
 import 'package:dalm/features/photo/presentation/view_models/photo_library_view_model.dart';
 import 'package:dalm/features/photo/presentation/widgets/camera_permission_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/camera_settings_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_empty_placeholder.dart';
-import 'package:dalm/features/photo/presentation/widgets/photo_permission_dialog.dart';
-import 'package:dalm/features/photo/presentation/widgets/photo_settings_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_source_action_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,9 +18,6 @@ class PhotoUploadScreen extends ConsumerWidget {
     super.key,
     this.onCameraPressed,
     this.onGalleryPressed,
-    this.onAllowAllPhotos,
-    this.onAllowSelectedPhotos,
-    this.onDenyPhotoPermission,
     this.onAllowCamera,
     this.onDenyCameraPermission,
     this.onPhotoCaptured,
@@ -32,9 +26,6 @@ class PhotoUploadScreen extends ConsumerWidget {
 
   final VoidCallback? onCameraPressed;
   final VoidCallback? onGalleryPressed;
-  final VoidCallback? onAllowAllPhotos;
-  final VoidCallback? onAllowSelectedPhotos;
-  final VoidCallback? onDenyPhotoPermission;
   final VoidCallback? onAllowCamera;
   final VoidCallback? onDenyCameraPermission;
   final ValueChanged<String>? onPhotoCaptured;
@@ -157,92 +148,21 @@ class PhotoUploadScreen extends ConsumerWidget {
     }
 
     final viewModel = ref.read(photoLibraryViewModelProvider);
-    late final PhotoLibraryPermissionStatus permission;
-
-    try {
-      permission = await viewModel.checkPermission();
-    } catch (_) {
-      if (context.mounted) {
-        _showMessage(context, '사진 권한을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.');
-      }
-      return;
-    }
-
-    if (!context.mounted) return;
-
-    if (permission == PhotoLibraryPermissionStatus.granted ||
-        permission == PhotoLibraryPermissionStatus.limited) {
-      final result = await viewModel.selectPhoto();
-      if (context.mounted) {
-        await _handleLibraryResult(context, viewModel, result);
-      }
-      return;
-    }
-
-    if (permission == PhotoLibraryPermissionStatus.restricted) {
-      _showMessage(context, '이 기기에서는 사진 접근 권한을 변경할 수 없어요.');
-      return;
-    }
-
-    // 앨범 접근 전 사용자에게 권한 사용 목적 안내
-    await PhotoPermissionDialog.show(
-      context,
-      onAllowAll:
-          onAllowAllPhotos ??
-          () {
-            unawaited(_requestAllPhotosAndSelect(context, viewModel));
-          },
-      onAllowSelected:
-          onAllowSelectedPhotos ??
-          () {
-            unawaited(_selectPhoto(context, viewModel));
-          },
-      onDeny: onDenyPhotoPermission ?? () {},
-    );
-  }
-
-  Future<void> _requestAllPhotosAndSelect(
-    BuildContext context,
-    PhotoLibraryViewModel viewModel,
-  ) async {
-    final result = await viewModel.requestAllAndSelectPhoto();
-    if (context.mounted) {
-      await _handleLibraryResult(context, viewModel, result);
-    }
-  }
-
-  Future<void> _selectPhoto(
-    BuildContext context,
-    PhotoLibraryViewModel viewModel,
-  ) async {
     final result = await viewModel.selectPhoto();
     if (context.mounted) {
-      await _handleLibraryResult(context, viewModel, result);
+      _handleLibraryResult(context, result);
     }
   }
 
-  Future<void> _handleLibraryResult(
+  void _handleLibraryResult(
     BuildContext context,
-    PhotoLibraryViewModel viewModel,
     PhotoLibrarySelectionResult result,
-  ) async {
+  ) {
     switch (result.outcome) {
       case PhotoLibrarySelectionOutcome.selected:
         onPhotoSelected?.call(result.photoPath!);
         return;
       case PhotoLibrarySelectionOutcome.cancelled:
-        return;
-      case PhotoLibrarySelectionOutcome.permissionDenied:
-        _showMessage(context, '사진 접근 권한이 허용되지 않았어요.');
-        return;
-      case PhotoLibrarySelectionOutcome.permissionPermanentlyDenied:
-        await PhotoSettingsDialog.show(
-          context,
-          onOpenSettings: () => unawaited(viewModel.openSettings()),
-        );
-        return;
-      case PhotoLibrarySelectionOutcome.permissionRestricted:
-        _showMessage(context, '이 기기에서는 사진 접근 권한을 변경할 수 없어요.');
         return;
       case PhotoLibrarySelectionOutcome.failed:
         _showMessage(context, '앨범을 열지 못했어요. 잠시 후 다시 시도해 주세요.');
