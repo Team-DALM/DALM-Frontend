@@ -66,7 +66,7 @@ class PhotoUploadScreen extends ConsumerWidget {
       case PhotoCameraPermissionStatus.granted:
         final result = await viewModel.takePhoto();
         if (context.mounted) {
-          await _handleCameraResult(context, viewModel, result);
+          await _handleCameraResult(context, ref, result);
         }
         return;
       case PhotoCameraPermissionStatus.permanentlyDenied:
@@ -76,23 +76,9 @@ class PhotoUploadScreen extends ConsumerWidget {
         _showMessage(context, '이 기기에서는 카메라 권한을 변경할 수 없어요.');
         return;
       case PhotoCameraPermissionStatus.denied:
-        break;
+        await _requestPermissionAndTakePhoto(context, ref);
+        return;
     }
-
-    if (!context.mounted) {
-      return;
-    }
-
-    // 카메라 실행 전 사용자에게 권한 사용 목적 안내
-    await CameraPermissionDialog.show(
-      context,
-      onAllow:
-          onAllowCamera ??
-          () {
-            unawaited(_requestPermissionAndTakePhoto(context, ref));
-          },
-      onDeny: onDenyCameraPermission ?? () {},
-    );
   }
 
   Future<void> _requestPermissionAndTakePhoto(
@@ -106,12 +92,12 @@ class PhotoUploadScreen extends ConsumerWidget {
       return;
     }
 
-    await _handleCameraResult(context, viewModel, result);
+    await _handleCameraResult(context, ref, result);
   }
 
   Future<void> _handleCameraResult(
     BuildContext context,
-    PhotoCameraViewModel viewModel,
+    WidgetRef ref,
     PhotoCameraCaptureResult result,
   ) async {
     switch (result.outcome) {
@@ -121,10 +107,21 @@ class PhotoUploadScreen extends ConsumerWidget {
       case PhotoCameraCaptureOutcome.cancelled:
         return;
       case PhotoCameraCaptureOutcome.permissionDenied:
-        _showMessage(context, '카메라 권한이 허용되지 않았어요.');
+        await CameraPermissionDialog.show(
+          context,
+          onAllow:
+              onAllowCamera ??
+              () {
+                unawaited(_requestPermissionAndTakePhoto(context, ref));
+              },
+          onDeny: onDenyCameraPermission ?? () {},
+        );
         return;
       case PhotoCameraCaptureOutcome.permissionPermanentlyDenied:
-        await _showCameraSettingsDialog(context, viewModel);
+        await _showCameraSettingsDialog(
+          context,
+          ref.read(photoCameraViewModelProvider),
+        );
         return;
       case PhotoCameraCaptureOutcome.permissionRestricted:
         _showMessage(context, '이 기기에서는 카메라 권한을 변경할 수 없어요.');

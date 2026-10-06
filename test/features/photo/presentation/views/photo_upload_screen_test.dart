@@ -164,7 +164,7 @@ void main() {
     expect(repository.selectPhotoCount, 1);
   });
 
-  testWidgets('카메라 선택 시 카메라 접근 권한 안내를 표시한다', (tester) async {
+  testWidgets('시스템 카메라 권한을 거절하면 권한 안내를 표시한다', (tester) async {
     final repository = _FakePhotoCameraRepository(
       permissionStatus: PhotoCameraPermissionStatus.denied,
     );
@@ -187,6 +187,7 @@ void main() {
     expect(find.text('카메라 사용 권한이 필요해요'), findsOneWidget);
     expect(find.text('카메라 사용 허용'), findsOneWidget);
     expect(find.text('지금은 허용하지 않기'), findsOneWidget);
+    expect(repository.permissionRequestCount, 1);
   });
 
   testWidgets('카메라 권한 허용 후 촬영 결과를 전달한다', (tester) async {
@@ -212,12 +213,11 @@ void main() {
 
     await tester.tap(find.text('카메라로 촬영하기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('카메라 사용 허용'));
-    await tester.pumpAndSettle();
 
     expect(repository.permissionRequestCount, 1);
     expect(repository.takePhotoCount, 1);
     expect(capturedPhotoPath, '/tmp/today-photo.jpg');
+    expect(find.text('카메라 사용 권한이 필요해요'), findsNothing);
   });
 
   testWidgets('카메라 권한이 이미 있으면 안내 없이 바로 촬영한다', (tester) async {
@@ -266,10 +266,9 @@ void main() {
 
     await tester.tap(find.text('카메라로 촬영하기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('카메라 사용 허용'));
-    await tester.pumpAndSettle();
 
     expect(find.text('설정에서 카메라를 허용해 주세요'), findsOneWidget);
+    expect(repository.permissionRequestCount, 1);
     expect(repository.takePhotoCount, 0);
 
     final openSettingsButton = find.widgetWithText(FilledButton, '설정 열기');
