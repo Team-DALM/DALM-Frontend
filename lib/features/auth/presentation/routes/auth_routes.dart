@@ -1,24 +1,26 @@
-import 'package:dalm/app/router/app_placeholder_page.dart';
 import 'package:dalm/app/router/app_routes.dart';
+import 'package:dalm/features/auth/presentation/views/login_screen.dart';
+import 'package:dalm/features/onboarding/presentation/views/onboarding_screen.dart';
+import 'package:dalm/features/onboarding/presentation/views/splash_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final authRootRoutes = <RouteBase>[
   GoRoute(
     path: AppRoutes.splash,
     builder: (context, state) {
-      return const AppPlaceholderPage(title: '스플래시');
+      return const SplashScreen();
     },
   ),
   GoRoute(
     path: AppRoutes.onboarding,
     builder: (context, state) {
-      return const AppPlaceholderPage(title: '온보딩');
+      return const OnboardingScreen();
     },
   ),
   GoRoute(
     path: AppRoutes.login,
     builder: (context, state) {
-      return const AppPlaceholderPage(title: '로그인');
+      return const LoginScreen();
     },
   ),
 ];

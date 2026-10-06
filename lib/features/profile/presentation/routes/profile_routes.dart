@@ -1,5 +1,6 @@
 import 'package:dalm/app/router/app_placeholder_page.dart';
 import 'package:dalm/app/router/app_routes.dart';
+import 'package:dalm/features/profile/presentation/views/profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
 abstract final class ProfileRouteLocations {
@@ -14,7 +15,7 @@ final profileShellRoutes = <RouteBase>[
   GoRoute(
     path: AppRoutes.profile,
     builder: (context, state) {
-      return const AppPlaceholderPage(title: '마이페이지');
+      return const ProfileScreen();
     },
   ),
 ];

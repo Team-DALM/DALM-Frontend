@@ -38,7 +38,7 @@ final class TokenRefresher {
     }
 
     final response = await _dio.post<Map<String, dynamic>>(
-      '/auth/refresh',
+      'auth/refresh',
       data: {'refresh_token': refreshToken},
     );
 
