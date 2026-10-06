@@ -45,6 +45,7 @@ void main() {
       ),
     );
 
+    await tester.ensureVisible(find.text('카메라로 촬영하기'));
     await tester.tap(find.text('카메라로 촬영하기'));
     await tester.ensureVisible(find.text('앨범에서 선택하기'));
     await tester.tap(find.text('앨범에서 선택하기'));
@@ -181,6 +182,7 @@ void main() {
       ),
     );
 
+    await tester.ensureVisible(find.text('카메라로 촬영하기'));
     await tester.tap(find.text('카메라로 촬영하기'));
     await tester.pumpAndSettle();
 
@@ -211,6 +213,7 @@ void main() {
       ),
     );
 
+    await tester.ensureVisible(find.text('카메라로 촬영하기'));
     await tester.tap(find.text('카메라로 촬영하기'));
     await tester.pumpAndSettle();
 
@@ -239,6 +242,7 @@ void main() {
       ),
     );
 
+    await tester.ensureVisible(find.text('카메라로 촬영하기'));
     await tester.tap(find.text('카메라로 촬영하기'));
     await tester.pumpAndSettle();
 
@@ -264,6 +268,7 @@ void main() {
       ),
     );
 
+    await tester.ensureVisible(find.text('카메라로 촬영하기'));
     await tester.tap(find.text('카메라로 촬영하기'));
     await tester.pumpAndSettle();
 

@@ -10,49 +10,46 @@ class PhotoEmptyPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 240,
-      height: 300,
-      child: CustomPaint(
-        foregroundPainter: const _DashedRoundedBorderPainter(),
-        child: Material(
-          color: DalmColors.surfaceMuted,
-          borderRadius: BorderRadius.circular(12),
-          clipBehavior: Clip.antiAlias,
-          child: const Stack(
-            children: [
-              Positioned(top: 91, left: 0, right: 0, child: _AddPhotoIcon()),
-              Positioned(
-                top: 168,
-                left: 0,
-                right: 0,
-                child: Text(
-                  '사진 한 장',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: DalmTypography.inter,
-                    fontSize: 13,
-                    height: 1.2,
-                    fontWeight: FontWeight.w700,
-                    color: DalmColors.textInk,
+      width: 280,
+      child: AspectRatio(
+        aspectRatio: 4 / 5,
+        child: CustomPaint(
+          foregroundPainter: const _DashedRoundedBorderPainter(),
+          child: Material(
+            color: DalmColors.surfaceMuted,
+            borderRadius: BorderRadius.circular(12),
+            clipBehavior: Clip.antiAlias,
+            child: const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _AddPhotoIcon(),
+                  SizedBox(height: 15),
+                  Text(
+                    '사진 한 장',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: DalmTypography.inter,
+                      fontSize: 13,
+                      height: 1.2,
+                      fontWeight: FontWeight.w700,
+                      color: DalmColors.textInk,
+                    ),
                   ),
-                ),
-              ),
-              Positioned(
-                top: 200,
-                left: 0,
-                right: 0,
-                child: Text(
-                  '4:5 세로 비율로 기록돼요.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: DalmTypography.inter,
-                    fontSize: 10,
-                    height: 1.2,
-                    color: DalmColors.textWarm,
+                  SizedBox(height: 16),
+                  Text(
+                    '4:5 세로 비율로 기록돼요.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: DalmTypography.inter,
+                      fontSize: 10,
+                      height: 1.2,
+                      color: DalmColors.textWarm,
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

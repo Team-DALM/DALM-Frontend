@@ -276,12 +276,12 @@ class PhotoUploadScreen extends ConsumerWidget {
                 child: IntrinsicHeight(
                   child: Column(
                     children: [
-                      const SizedBox(height: 125),
+                      const SizedBox(height: 100),
                       const Align(
                         alignment: Alignment(0.04, 0),
                         child: PhotoEmptyPlaceholder(),
                       ),
-                      const SizedBox(height: 47),
+                      const SizedBox(height: 70),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
@@ -304,7 +304,7 @@ class PhotoUploadScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(height: 40),
                       Text(
                         '사진은 공개 피드에 게시되지 않아요.',
                         style: DalmTypography.caption.copyWith(
