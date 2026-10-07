@@ -30,4 +30,10 @@ abstract final class DalmColors {
   static const kakaoText = DalmPalette.kakaoText;
 
   static const overlay = Color(0x66000000);
+
+  // 사진 편집 화면
+  static const photoEditorBackground = DalmPalette.deepInk;
+  static const photoEditorSurface = DalmPalette.ink;
+  static const photoEditorTextSecondary = DalmPalette.disabled;
+  static const photoEditorDivider = DalmPalette.ink;
 }
