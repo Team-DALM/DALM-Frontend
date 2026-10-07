@@ -88,98 +88,100 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final availableWidth = constraints.maxWidth - 48;
-                  final availableHeight = constraints.maxHeight - 184;
-                  final cropWidth = availableWidth.clamp(
-                    0.0,
-                    availableHeight * 4 / 5,
-                  );
+                  final cropAreaWidth = constraints.maxWidth.clamp(0.0, 390.0);
+                  final designScale = cropAreaWidth / 390;
+                  final cropAreaHeight = 490 * designScale;
+                  final cropWidth = (cropAreaWidth - 60).clamp(0.0, 330.0);
 
-                  return Column(
-                    children: [
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        key: const Key('photoCropViewport'),
-                        width: cropWidth,
-                        child: AspectRatio(
-                          aspectRatio: 4 / 5,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: DalmColors.textInverse,
-                                width: 1,
-                              ),
-                            ),
-                            child: ClipRect(
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  RepaintBoundary(
-                                    key: _cropBoundaryKey,
-                                    child: InteractiveViewer(
-                                      transformationController:
-                                          _transformationController,
-                                      minScale: 1,
-                                      maxScale: 5,
-                                      child: RotatedBox(
-                                        quarterTurns: _quarterTurns,
-                                        child: Image.file(
-                                          File(widget.imagePath),
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (
-                                                context,
-                                                error,
-                                                stackTrace,
-                                              ) => ColoredBox(
-                                                color: DalmColors
-                                                    .photoEditorSurface,
-                                                child: Center(
-                                                  child: Icon(
-                                                    Icons.broken_image_outlined,
-                                                    color: DalmColors
-                                                        .textInverse
-                                                        .withValues(
-                                                          alpha: 0.54,
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            key: const Key('photoCropArea'),
+                            width: cropAreaWidth,
+                            height: cropAreaHeight,
+                            child: Center(
+                              child: SizedBox(
+                                key: const Key('photoCropViewport'),
+                                width: cropWidth,
+                                child: AspectRatio(
+                                  aspectRatio: 4 / 5,
+                                  child: ClipRect(
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        RepaintBoundary(
+                                          key: _cropBoundaryKey,
+                                          child: InteractiveViewer(
+                                            transformationController:
+                                                _transformationController,
+                                            minScale: 1,
+                                            maxScale: 5,
+                                            child: RotatedBox(
+                                              quarterTurns: _quarterTurns,
+                                              child: Image.file(
+                                                File(widget.imagePath),
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) => ColoredBox(
+                                                      color: DalmColors
+                                                          .photoEditorSurface,
+                                                      child: Center(
+                                                        child: Icon(
+                                                          Icons
+                                                              .broken_image_outlined,
+                                                          color: DalmColors
+                                                              .textInverse
+                                                              .withValues(
+                                                                alpha: 0.54,
+                                                              ),
+                                                          size: 42,
                                                         ),
-                                                    size: 42,
-                                                  ),
-                                                ),
+                                                      ),
+                                                    ),
                                               ),
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        const IgnorePointer(
+                                          child: CustomPaint(
+                                            painter: _CropGridPainter(),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const IgnorePointer(
-                                    child: CustomPaint(
-                                      painter: _CropGridPainter(),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                          Text(
+                            '손가락으로 확대하고 움직여 장면을 맞춰주세요.',
+                            style: DalmTypography.caption.copyWith(
+                              fontSize: 10,
+                              color: DalmColors.photoEditorTextSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 54),
+                          SizedBox(
+                            width: cropAreaWidth,
+                            child: _CropToolbar(
+                              onReset: _reset,
+                              onRotate: _rotate,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
                       ),
-                      const SizedBox(height: 28),
-                      Text(
-                        '손가락으로 확대하고 움직여 장면을 맞춰주세요.',
-                        style: DalmTypography.caption.copyWith(
-                          fontSize: 10,
-                          color: DalmColors.photoEditorTextSecondary,
-                        ),
-                      ),
-                      const Spacer(),
-                      const Divider(
-                        height: 1,
-                        indent: 28,
-                        endIndent: 28,
-                        color: DalmColors.photoEditorDivider,
-                      ),
-                      const SizedBox(height: 18),
-                      _CropToolbar(onReset: _reset, onRotate: _rotate),
-                      const SizedBox(height: 28),
-                    ],
+                    ),
                   );
                 },
               ),
@@ -205,9 +207,10 @@ class _CropHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 64,
+      key: const Key('photoCropHeader'),
+      height: 80,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Row(
           children: [
             IconButton(
@@ -270,7 +273,7 @@ class _CropToolbar extends StatelessWidget {
         ),
         const _AspectRatioIndicator(),
         _CropToolButton(
-          icon: Icons.crop_rotate_rounded,
+          icon: Icons.crop_free_rounded,
           label: '회전',
           tooltip: '사진 90도 회전',
           onPressed: onRotate,
@@ -344,7 +347,7 @@ class _AspectRatioIndicator extends StatelessWidget {
             child: Text(
               '4 : 5',
               style: DalmTypography.caption.copyWith(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: DalmColors.emotionalAccent,
               ),
@@ -369,7 +372,7 @@ class _CropGridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    final gridPaint = Paint()
       ..color = DalmColors.textInverse.withValues(alpha: 0.42)
       ..strokeWidth = 0.7;
 
@@ -377,9 +380,19 @@ class _CropGridPainter extends CustomPainter {
       final x = size.width * index / 3;
       final y = size.height * index / 3;
       canvas
-        ..drawLine(Offset(x, 0), Offset(x, size.height), paint)
-        ..drawLine(Offset(0, y), Offset(size.width, y), paint);
+        ..drawLine(Offset(x, 1), Offset(x, size.height - 1), gridPaint)
+        ..drawLine(Offset(1, y), Offset(size.width - 1, y), gridPaint);
     }
+
+    final borderPaint = Paint()
+      ..color = DalmColors.textInverse
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    canvas.drawRect(
+      Rect.fromLTWH(0.5, 0.5, size.width - 1, size.height - 1),
+      borderPaint,
+    );
   }
 
   @override

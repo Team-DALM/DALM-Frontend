@@ -24,6 +24,11 @@ void main() {
   });
 
   testWidgets('4:5 사진 맞추기 화면을 표시한다', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
     await tester.pumpWidget(
       MaterialApp(home: PhotoCropScreen(imagePath: imageFile.path)),
     );
@@ -38,6 +43,32 @@ void main() {
     final viewportSize = tester.getSize(
       find.byKey(const Key('photoCropViewport')),
     );
+    final headerSize = tester.getSize(find.byKey(const Key('photoCropHeader')));
+    expect(headerSize.height, 80);
+    expect(viewportSize.width, 330);
+    expect(viewportSize.height, 412.5);
     expect(viewportSize.width / viewportSize.height, closeTo(4 / 5, 0.001));
+  });
+
+  testWidgets('좁은 화면에서도 사진 좌우 여백을 30으로 유지한다', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(360, 800);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      MaterialApp(home: PhotoCropScreen(imagePath: imageFile.path)),
+    );
+    await tester.pumpAndSettle();
+
+    final areaFinder = find.byKey(const Key('photoCropArea'));
+    final viewportFinder = find.byKey(const Key('photoCropViewport'));
+    final areaLeft = tester.getTopLeft(areaFinder).dx;
+    final areaRight = tester.getTopRight(areaFinder).dx;
+    final viewportLeft = tester.getTopLeft(viewportFinder).dx;
+    final viewportRight = tester.getTopRight(viewportFinder).dx;
+
+    expect(viewportLeft - areaLeft, 30);
+    expect(areaRight - viewportRight, 30);
   });
 }
