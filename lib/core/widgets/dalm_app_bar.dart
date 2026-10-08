@@ -11,14 +11,17 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBackPressed,
     this.actionLabel,
     this.onActionPressed,
+    this.infoLabel,
     this.onMorePressed,
   }) : assert(
          actionLabel == null || onActionPressed != null,
          'actionLabel을 사용하려면 onActionPressed도 전달해야 합니다.',
        ),
        assert(
-         actionLabel == null || onMorePressed == null,
-         '오른쪽 문구와 더보기 버튼은 동시에 사용할 수 없습니다.',
+         (actionLabel == null || infoLabel == null) &&
+             (actionLabel == null || onMorePressed == null) &&
+             (infoLabel == null || onMorePressed == null),
+         '오른쪽 액션, 정보 문구, 더보기 버튼은 동시에 사용할 수 없습니다.',
        );
 
   final String title;
@@ -26,6 +29,7 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackPressed;
   final String? actionLabel;
   final VoidCallback? onActionPressed;
+  final String? infoLabel;
   final VoidCallback? onMorePressed;
 
   @override
@@ -73,6 +77,18 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
               actionLabel!,
               style: DalmTypography.caption.copyWith(
                 color: DalmColors.textSecondary,
+              ),
+            ),
+          )
+        else if (infoLabel != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Center(
+              child: Text(
+                infoLabel!,
+                style: DalmTypography.caption.copyWith(
+                  color: DalmColors.textSecondary,
+                ),
               ),
             ),
           )
