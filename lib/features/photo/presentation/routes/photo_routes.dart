@@ -1,11 +1,11 @@
 import 'package:dalm/app/router/app_routes.dart';
-import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/features/photo/presentation/views/photo_crop_screen.dart';
 import 'package:dalm/features/photo/presentation/views/photo_upload_screen.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 void _openPhotoCrop(BuildContext context, String imagePath) {
+  // 선택한 원본 사진 경로를 크롭 화면에 전달
   context.push(AppRoutes.photoCrop, extra: imagePath);
 }
 
@@ -21,31 +21,15 @@ final photoRootRoutes = <RouteBase>[
   ),
   GoRoute(
     path: AppRoutes.photoCrop,
-    builder: (context, state) {
+    redirect: (context, state) {
+      // 사진 경로 없이 직접 진입하면 사진 등록 화면으로 이동
       final imagePath = state.extra;
-      if (imagePath is! String || imagePath.isEmpty) {
-        return const _MissingPhotoScreen();
-      }
-
-      return PhotoCropScreen(imagePath: imagePath);
+      return imagePath is String && imagePath.isNotEmpty
+          ? null
+          : AppRoutes.photoUpload;
+    },
+    builder: (context, state) {
+      return PhotoCropScreen(imagePath: state.extra! as String);
     },
   ),
 ];
-
-class _MissingPhotoScreen extends StatelessWidget {
-  const _MissingPhotoScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: DalmColors.photoEditorBackground,
-      child: Center(
-        child: Text(
-          '사진을 불러오지 못했어요.',
-          textDirection: TextDirection.ltr,
-          style: TextStyle(color: DalmColors.textInverse),
-        ),
-      ),
-    );
-  }
-}

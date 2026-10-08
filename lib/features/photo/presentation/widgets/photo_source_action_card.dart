@@ -2,6 +2,7 @@ import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:flutter/material.dart';
 
+/// 카메라 또는 앨범을 선택하는 액션 카드
 class PhotoSourceActionCard extends StatelessWidget {
   const PhotoSourceActionCard({
     super.key,

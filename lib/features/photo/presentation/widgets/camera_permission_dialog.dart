@@ -2,6 +2,7 @@ import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:flutter/material.dart';
 
+/// 카메라 권한 거절 후 재요청을 안내하는 다이얼로그
 class CameraPermissionDialog extends StatelessWidget {
   const CameraPermissionDialog({
     super.key,
@@ -113,6 +114,7 @@ class CameraPermissionDialog extends StatelessWidget {
   }
 }
 
+/// 카메라 권한 안내 아이콘
 class _CameraPermissionIcon extends StatelessWidget {
   const _CameraPermissionIcon();
 

@@ -71,4 +71,19 @@ void main() {
     expect(viewportLeft - areaLeft, 30);
     expect(areaRight - viewportRight, 30);
   });
+
+  testWidgets('사진을 불러오지 못하면 다음 버튼을 비활성화한다', (tester) async {
+    final missingPath =
+        '${tempDirectory.path}${Platform.pathSeparator}missing.png';
+
+    await tester.pumpWidget(
+      MaterialApp(home: PhotoCropScreen(imagePath: missingPath)),
+    );
+    await tester.pumpAndSettle();
+
+    final nextButton = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, '다음'),
+    );
+    expect(nextButton.onPressed, isNull);
+  });
 }

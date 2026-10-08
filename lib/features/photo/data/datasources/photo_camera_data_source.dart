@@ -1,6 +1,7 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+/// 기기의 카메라 권한과 촬영 기능 접근 규격
 abstract interface class PhotoCameraDataSource {
   Future<PermissionStatus> checkPermission();
 
@@ -11,6 +12,7 @@ abstract interface class PhotoCameraDataSource {
   Future<bool> openSettings();
 }
 
+/// 시스템 권한 창과 기본 카메라 앱을 사용하는 데이터 소스
 final class DevicePhotoCameraDataSource implements PhotoCameraDataSource {
   DevicePhotoCameraDataSource({ImagePicker? imagePicker})
     : _imagePicker = imagePicker ?? ImagePicker();

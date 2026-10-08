@@ -2,6 +2,7 @@ import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:flutter/material.dart';
 
+/// 영구 거절된 카메라 권한의 설정 이동 다이얼로그
 class CameraSettingsDialog extends StatelessWidget {
   const CameraSettingsDialog({super.key, required this.onOpenSettings});
 

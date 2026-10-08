@@ -82,6 +82,30 @@ void main() {
     expect(selectedPath, '/tmp/selected-photo.jpg');
   });
 
+  testWidgets('Android에서 중단된 사진 선택 결과를 복구해 전달한다', (tester) async {
+    final repository = _FakePhotoLibraryRepository(
+      recoveredPhotoPath: '/tmp/recovered-photo.jpg',
+    );
+    String? recoveredPath;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          photoLibraryRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          theme: DalmTheme.light,
+          home: PhotoUploadScreen(
+            onPhotoSelected: (path) => recoveredPath = path,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(recoveredPath, '/tmp/recovered-photo.jpg');
+  });
+
   testWidgets('시스템 카메라 권한을 거절하면 권한 안내를 표시한다', (tester) async {
     final repository = _FakePhotoCameraRepository(
       permissionStatus: PhotoCameraPermissionStatus.denied,
@@ -248,9 +272,10 @@ final class _FakePhotoCameraRepository implements PhotoCameraRepository {
 }
 
 final class _FakePhotoLibraryRepository implements PhotoLibraryRepository {
-  _FakePhotoLibraryRepository({this.photoPath});
+  _FakePhotoLibraryRepository({this.photoPath, this.recoveredPhotoPath});
 
   final String? photoPath;
+  final String? recoveredPhotoPath;
 
   int selectPhotoCount = 0;
 
@@ -259,4 +284,7 @@ final class _FakePhotoLibraryRepository implements PhotoLibraryRepository {
     selectPhotoCount += 1;
     return photoPath;
   }
+
+  @override
+  Future<String?> retrieveLostPhoto() async => recoveredPhotoPath;
 }

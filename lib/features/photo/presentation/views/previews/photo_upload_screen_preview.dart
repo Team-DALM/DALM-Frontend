@@ -6,6 +6,7 @@ import 'package:flutter/widget_previews.dart';
 
 void _onPreviewPressed() {}
 
+/// 사진 등록 화면 미리보기
 @Preview(name: '기본', group: 'PhotoUploadScreen', size: Size(390, 844))
 Widget photoUploadScreenPreview() {
   return ProviderScope(

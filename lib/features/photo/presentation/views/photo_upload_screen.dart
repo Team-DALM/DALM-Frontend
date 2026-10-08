@@ -9,10 +9,12 @@ import 'package:dalm/features/photo/presentation/view_models/photo_library_view_
 import 'package:dalm/features/photo/presentation/widgets/camera_permission_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/camera_settings_dialog.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_empty_placeholder.dart';
+import 'package:dalm/features/photo/presentation/widgets/photo_lost_data_recovery.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_source_action_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// 카메라 촬영 또는 앨범 선택을 시작하는 사진 등록 화면
 class PhotoUploadScreen extends ConsumerWidget {
   const PhotoUploadScreen({
     super.key,
@@ -53,6 +55,7 @@ class PhotoUploadScreen extends ConsumerWidget {
       return;
     }
 
+    // 현재 권한 상태에 맞는 촬영 흐름만 실행
     switch (permission) {
       case PhotoCameraPermissionStatus.granted:
         final result = await viewModel.takePhoto();
@@ -147,6 +150,7 @@ class PhotoUploadScreen extends ConsumerWidget {
       return;
     }
 
+    // Photo Picker가 반환한 한 장의 사진 경로를 전달
     final viewModel = ref.read(photoLibraryViewModelProvider);
     final result = await viewModel.selectPhoto();
     if (context.mounted) {
@@ -186,61 +190,73 @@ class PhotoUploadScreen extends ConsumerWidget {
           color: DalmColors.textInk,
         ),
       ),
-      body: SafeArea(
-        top: false,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 100),
-                      const Align(
-                        alignment: Alignment(0.04, 0),
-                        child: PhotoEmptyPlaceholder(),
-                      ),
-                      const SizedBox(height: 70),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          children: [
-                            PhotoSourceActionCard(
-                              icon: Icons.photo_camera_outlined,
-                              iconBackgroundColor: DalmColors.primaryAction,
-                              title: '카메라로 촬영하기',
-                              description: '지금 마주한 장면을 바로 남겨요.',
-                              onPressed: () => _openCamera(context, ref),
+      body: Stack(
+        children: [
+          SafeArea(
+            top: false,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 100),
+                          const Align(
+                            alignment: Alignment(0.04, 0),
+                            child: PhotoEmptyPlaceholder(),
+                          ),
+                          const SizedBox(height: 70),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              children: [
+                                PhotoSourceActionCard(
+                                  icon: Icons.photo_camera_outlined,
+                                  iconBackgroundColor: DalmColors.primaryAction,
+                                  title: '카메라로 촬영하기',
+                                  description: '지금 마주한 장면을 바로 남겨요.',
+                                  onPressed: () => _openCamera(context, ref),
+                                ),
+                                const SizedBox(height: 12),
+                                PhotoSourceActionCard(
+                                  icon: Icons.photo_outlined,
+                                  iconBackgroundColor:
+                                      DalmColors.secondaryAction,
+                                  title: '앨범에서 선택하기',
+                                  description: '최근 사진에서 한 장을 골라요.',
+                                  onPressed: () => _openGallery(context, ref),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            PhotoSourceActionCard(
-                              icon: Icons.photo_outlined,
-                              iconBackgroundColor: DalmColors.secondaryAction,
-                              title: '앨범에서 선택하기',
-                              description: '최근 사진에서 한 장을 골라요.',
-                              onPressed: () => _openGallery(context, ref),
+                          ),
+                          const SizedBox(height: 40),
+                          Text(
+                            '사진은 공개 피드에 게시되지 않아요.',
+                            style: DalmTypography.caption.copyWith(
+                              fontSize: 9,
+                              height: 1.2,
+                              color: DalmColors.textWarm,
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 90),
+                        ],
                       ),
-                      const SizedBox(height: 40),
-                      Text(
-                        '사진은 공개 피드에 게시되지 않아요.',
-                        style: DalmTypography.caption.copyWith(
-                          fontSize: 9,
-                          height: 1.2,
-                          color: DalmColors.textWarm,
-                        ),
-                      ),
-                      const SizedBox(height: 90),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          },
-        ),
+                );
+              },
+            ),
+          ),
+          PhotoLostDataRecovery(
+            onRecovered: (path) => onPhotoSelected?.call(path),
+            onFailed: () =>
+                _showMessage(context, '선택했던 사진을 복구하지 못했어요. 다시 선택해 주세요.'),
+          ),
+        ],
       ),
     );
   }

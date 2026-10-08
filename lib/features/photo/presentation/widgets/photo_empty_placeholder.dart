@@ -4,6 +4,7 @@ import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:flutter/material.dart';
 
+/// 등록할 사진의 4:5 비율을 미리 보여주는 빈 영역
 class PhotoEmptyPlaceholder extends StatelessWidget {
   const PhotoEmptyPlaceholder({super.key});
 
@@ -57,6 +58,7 @@ class PhotoEmptyPlaceholder extends StatelessWidget {
   }
 }
 
+/// 빈 사진 영역 중앙의 추가 아이콘
 class _AddPhotoIcon extends StatelessWidget {
   const _AddPhotoIcon();
 
@@ -80,6 +82,7 @@ class _AddPhotoIcon extends StatelessWidget {
   }
 }
 
+/// 빈 사진 영역의 점선 테두리
 class _DashedRoundedBorderPainter extends CustomPainter {
   const _DashedRoundedBorderPainter();
 

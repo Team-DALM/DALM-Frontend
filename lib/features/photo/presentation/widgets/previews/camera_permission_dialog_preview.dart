@@ -6,6 +6,7 @@ import 'package:flutter/widget_previews.dart';
 
 void _onPreviewPressed() {}
 
+/// 카메라 권한 안내 다이얼로그 미리보기
 @Preview(name: '기본', group: 'CameraPermissionDialog', size: Size(390, 844))
 Widget cameraPermissionDialogPreview() {
   return MaterialApp(

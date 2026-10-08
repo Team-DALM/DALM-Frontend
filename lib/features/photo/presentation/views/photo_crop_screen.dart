@@ -3,9 +3,12 @@ import 'dart:ui' as ui;
 
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
+import 'package:dalm/features/photo/presentation/widgets/photo_crop_toolbar.dart';
+import 'package:dalm/features/photo/presentation/widgets/photo_crop_viewport.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+/// 선택한 사진을 4:5 비율로 맞추는 화면
 class PhotoCropScreen extends StatefulWidget {
   const PhotoCropScreen({super.key, required this.imagePath, this.onCompleted});
 
@@ -22,6 +25,7 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
 
   int _quarterTurns = 0;
   bool _isExporting = false;
+  bool _isImageReady = false;
 
   @override
   void dispose() {
@@ -30,47 +34,75 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
   }
 
   void _reset() {
+    // 사진 확대, 이동, 회전 상태 초기화
     _transformationController.value = Matrix4.identity();
     setState(() => _quarterTurns = 0);
   }
 
   void _rotate() {
+    // 사진을 시계 방향으로 90도 회전
     _transformationController.value = Matrix4.identity();
     setState(() => _quarterTurns = (_quarterTurns + 1) % 4);
   }
 
   Future<void> _complete() async {
-    if (_isExporting) return;
+    // 이미지 로드 전 또는 저장 중 중복 실행 방지
+    if (_isExporting || !_isImageReady) return;
 
     setState(() => _isExporting = true);
 
+    String? outputPath;
     try {
-      await WidgetsBinding.instance.endOfFrame;
-      final boundary =
-          _cropBoundaryKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
-      if (boundary == null) return;
+      outputPath = await _exportCroppedPhoto();
+    } catch (_) {
+      if (mounted) _showExportFailure();
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
 
-      final image = await boundary.toImage(pixelRatio: 3);
+    if (!mounted || outputPath == null) return;
+    if (widget.onCompleted case final callback?) {
+      callback(outputPath);
+    } else {
+      Navigator.of(context).pop(outputPath);
+    }
+  }
+
+  Future<String> _exportCroppedPhoto() async {
+    // 화면에 보이는 크롭 영역을 PNG 파일로 저장
+    await WidgetsBinding.instance.endOfFrame;
+    final boundary =
+        _cropBoundaryKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
+    if (boundary == null) throw StateError('Crop boundary is unavailable.');
+
+    final image = await boundary.toImage(pixelRatio: 3);
+    try {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      image.dispose();
-      if (byteData == null) return;
+      if (byteData == null) throw StateError('Crop image encoding failed.');
 
       final outputFile = File(
         '${Directory.systemTemp.path}${Platform.pathSeparator}'
         'dalm_photo_${DateTime.now().microsecondsSinceEpoch}.png',
       );
       await outputFile.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
-
-      if (!mounted) return;
-      if (widget.onCompleted case final callback?) {
-        callback(outputFile.path);
-      } else {
-        Navigator.of(context).pop(outputFile.path);
-      }
+      return outputFile.path;
     } finally {
-      if (mounted) setState(() => _isExporting = false);
+      image.dispose();
     }
+  }
+
+  void _showExportFailure() {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(content: Text('사진을 저장하지 못했어요. 다시 시도해 주세요.')),
+      );
+  }
+
+  void _setImageReady(bool isReady) {
+    if (_isImageReady == isReady) return;
+    setState(() => _isImageReady = isReady);
   }
 
   @override
@@ -82,6 +114,7 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
           children: [
             _CropHeader(
               isExporting: _isExporting,
+              canProceed: _isImageReady,
               onBack: () => Navigator.of(context).maybePop(),
               onNext: _complete,
             ),
@@ -100,68 +133,15 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
                       ),
                       child: Column(
                         children: [
-                          SizedBox(
-                            key: const Key('photoCropArea'),
-                            width: cropAreaWidth,
-                            height: cropAreaHeight,
-                            child: Center(
-                              child: SizedBox(
-                                key: const Key('photoCropViewport'),
-                                width: cropWidth,
-                                child: AspectRatio(
-                                  aspectRatio: 4 / 5,
-                                  child: ClipRect(
-                                    child: Stack(
-                                      fit: StackFit.expand,
-                                      children: [
-                                        RepaintBoundary(
-                                          key: _cropBoundaryKey,
-                                          child: InteractiveViewer(
-                                            transformationController:
-                                                _transformationController,
-                                            minScale: 1,
-                                            maxScale: 5,
-                                            child: RotatedBox(
-                                              quarterTurns: _quarterTurns,
-                                              child: Image.file(
-                                                File(widget.imagePath),
-                                                fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => ColoredBox(
-                                                      color: DalmColors
-                                                          .photoEditorSurface,
-                                                      child: Center(
-                                                        child: Icon(
-                                                          Icons
-                                                              .broken_image_outlined,
-                                                          color: DalmColors
-                                                              .textInverse
-                                                              .withValues(
-                                                                alpha: 0.54,
-                                                              ),
-                                                          size: 42,
-                                                        ),
-                                                      ),
-                                                    ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const IgnorePointer(
-                                          child: CustomPaint(
-                                            painter: _CropGridPainter(),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                          PhotoCropViewport(
+                            imagePath: widget.imagePath,
+                            boundaryKey: _cropBoundaryKey,
+                            transformationController: _transformationController,
+                            quarterTurns: _quarterTurns,
+                            areaWidth: cropAreaWidth,
+                            areaHeight: cropAreaHeight,
+                            cropWidth: cropWidth,
+                            onImageReadyChanged: _setImageReady,
                           ),
                           Text(
                             '손가락으로 확대하고 움직여 장면을 맞춰주세요.',
@@ -173,7 +153,7 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
                           const SizedBox(height: 54),
                           SizedBox(
                             width: cropAreaWidth,
-                            child: _CropToolbar(
+                            child: PhotoCropToolbar(
                               onReset: _reset,
                               onRotate: _rotate,
                             ),
@@ -193,14 +173,17 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
   }
 }
 
+/// 사진 크롭 화면의 뒤로 가기와 완료 헤더
 class _CropHeader extends StatelessWidget {
   const _CropHeader({
     required this.isExporting,
+    required this.canProceed,
     required this.onBack,
     required this.onNext,
   });
 
   final bool isExporting;
+  final bool canProceed;
   final VoidCallback onBack;
   final VoidCallback onNext;
 
@@ -230,7 +213,7 @@ class _CropHeader extends StatelessWidget {
             ),
             const Spacer(),
             TextButton(
-              onPressed: isExporting ? null : onNext,
+              onPressed: isExporting || !canProceed ? null : onNext,
               child: isExporting
                   ? const SizedBox.square(
                       dimension: 16,
@@ -252,149 +235,4 @@ class _CropHeader extends StatelessWidget {
       ),
     );
   }
-}
-
-class _CropToolbar extends StatelessWidget {
-  const _CropToolbar({required this.onReset, required this.onRotate});
-
-  final VoidCallback onReset;
-  final VoidCallback onRotate;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _CropToolButton(
-          icon: Icons.refresh_rounded,
-          label: '초기화',
-          tooltip: '사진 위치 초기화',
-          onPressed: onReset,
-        ),
-        const _AspectRatioIndicator(),
-        _CropToolButton(
-          icon: Icons.crop_free_rounded,
-          label: '회전',
-          tooltip: '사진 90도 회전',
-          onPressed: onRotate,
-        ),
-      ],
-    );
-  }
-}
-
-class _CropToolButton extends StatelessWidget {
-  const _CropToolButton({
-    required this.icon,
-    required this.label,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String label;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: tooltip,
-      child: InkResponse(
-        onTap: onPressed,
-        radius: 32,
-        child: SizedBox(
-          width: 72,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: DalmColors.textInverse, size: 26),
-              const SizedBox(height: 9),
-              Text(
-                label,
-                style: DalmTypography.caption.copyWith(
-                  fontSize: 10,
-                  color: DalmColors.photoEditorTextSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AspectRatioIndicator extends StatelessWidget {
-  const _AspectRatioIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 72,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 42,
-            height: 34,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: DalmColors.photoEditorSurface,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              '4 : 5',
-              style: DalmTypography.caption.copyWith(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: DalmColors.emotionalAccent,
-              ),
-            ),
-          ),
-          const SizedBox(height: 9),
-          Text(
-            '고정 비율',
-            style: DalmTypography.caption.copyWith(
-              fontSize: 10,
-              color: DalmColors.photoEditorTextSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CropGridPainter extends CustomPainter {
-  const _CropGridPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final gridPaint = Paint()
-      ..color = DalmColors.textInverse.withValues(alpha: 0.42)
-      ..strokeWidth = 0.7;
-
-    for (var index = 1; index < 3; index++) {
-      final x = size.width * index / 3;
-      final y = size.height * index / 3;
-      canvas
-        ..drawLine(Offset(x, 1), Offset(x, size.height - 1), gridPaint)
-        ..drawLine(Offset(1, y), Offset(size.width - 1, y), gridPaint);
-    }
-
-    final borderPaint = Paint()
-      ..color = DalmColors.textInverse
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    canvas.drawRect(
-      Rect.fromLTWH(0.5, 0.5, size.width - 1, size.height - 1),
-      borderPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
