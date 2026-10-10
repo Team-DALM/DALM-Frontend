@@ -13,5 +13,6 @@ abstract final class AppRoutes {
   // 바텀 네비게이션 없이 열리는 독립 화면
   static const photoUpload = '/photo/upload'; // 사진 업로드 화면
   static const photoCrop = '/photo/crop'; // 사진 4:5 맞추기 화면
+  static const photoAnalysis = '/photo/analysis'; // 사진 AI 분석 진행 화면
   static const matching = '/matching'; // 매칭 화면
 }

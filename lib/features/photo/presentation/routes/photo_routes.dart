@@ -1,4 +1,6 @@
 import 'package:dalm/app/router/app_routes.dart';
+import 'package:dalm/features/photo/presentation/routes/photo_analysis_route_args.dart';
+import 'package:dalm/features/photo/presentation/views/photo_analysis_screen.dart';
 import 'package:dalm/features/photo/presentation/views/photo_crop_screen.dart';
 import 'package:dalm/features/photo/presentation/views/photo_upload_screen.dart';
 import 'package:flutter/widgets.dart';
@@ -30,6 +32,21 @@ final photoRootRoutes = <RouteBase>[
     },
     builder: (context, state) {
       return PhotoCropScreen(imagePath: state.extra! as String);
+    },
+  ),
+  GoRoute(
+    path: AppRoutes.photoAnalysis,
+    redirect: (context, state) {
+      return state.extra is PhotoAnalysisRouteArgs
+          ? null
+          : AppRoutes.photoUpload;
+    },
+    builder: (context, state) {
+      final args = state.extra! as PhotoAnalysisRouteArgs;
+      return PhotoAnalysisScreen(
+        imagePath: args.imagePath,
+        photoId: args.uploadResult.photoId,
+      );
     },
   ),
 ];

@@ -27,6 +27,15 @@ abstract final class AppConfig {
     return value.endsWith('/') ? value : '$value/';
   }
 
+  static bool get useFakePhotoAnalysis {
+    return dotenv.env['USE_FAKE_PHOTO_ANALYSIS']?.toLowerCase() == 'true';
+  }
+
+  static String get fakePhotoAnalysisResult {
+    return dotenv.env['FAKE_PHOTO_ANALYSIS_RESULT']?.toUpperCase() ??
+        'SEARCHING';
+  }
+
   static final termsOfServiceUri = Uri.parse(
     'https://app.notion.com/p/DALM-3d4cb76aa8eb80ab821be73c75ceb66f'
     '?source=copy_link',

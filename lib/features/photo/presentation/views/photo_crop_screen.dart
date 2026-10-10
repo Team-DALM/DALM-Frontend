@@ -1,15 +1,18 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/error/network_exception.dart';
+import 'package:dalm/features/photo/presentation/routes/photo_analysis_route_args.dart';
 import 'package:dalm/features/photo/presentation/view_models/photo_upload_view_model.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_crop_toolbar.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_crop_viewport.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// 선택한 사진을 4:5 비율로 맞추는 화면
 class PhotoCropScreen extends ConsumerStatefulWidget {
@@ -74,16 +77,27 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
             .read(photoUploadViewModelProvider)
             .uploadPhoto(outputPath);
 
-        if (mounted) Navigator.of(context).pop(result);
+        if (!mounted) {
+          await _deleteTemporaryFile(outputPath);
+          return;
+        }
+
+        context.pushReplacement(
+          AppRoutes.photoAnalysis,
+          extra: PhotoAnalysisRouteArgs(
+            imagePath: outputPath,
+            uploadResult: result,
+          ),
+        );
       } on NetworkException catch (error, stackTrace) {
         _logUploadFailure(error, stackTrace);
         if (mounted) _showUploadFailure(_uploadFailureMessage(error));
+        await _deleteTemporaryFile(outputPath);
       } on Object catch (error, stackTrace) {
         _logUploadFailure(error, stackTrace);
         if (mounted) {
           _showUploadFailure('사진을 처리하지 못했어요. 다시 시도해 주세요.');
         }
-      } finally {
         await _deleteTemporaryFile(outputPath);
       }
     } finally {
