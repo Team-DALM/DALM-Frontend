@@ -1,25 +1,8 @@
-import java.util.Properties
-
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
-
-val dalmEnvironment = Properties().apply {
-    val environmentFile = rootProject.file("../.env")
-
-    if (!environmentFile.exists()) {
-        throw GradleException("frontend/.env 파일이 없습니다.")
-    }
-
-    environmentFile.inputStream().use { load(it) }
-}
-
-val kakaoNativeAppKey = dalmEnvironment.getProperty("KAKAO_NATIVE_APP_KEY")
-    ?.trim()
-    ?.takeIf { it.isNotEmpty() }
-    ?: throw GradleException("KAKAO_NATIVE_APP_KEY가 설정되지 않았습니다.")
 
 android {
     namespace = "com.goodshot.dalm"
@@ -43,7 +26,6 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
     }
 
     buildTypes {
