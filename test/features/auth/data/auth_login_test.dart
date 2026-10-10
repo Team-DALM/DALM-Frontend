@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:dalm/core/network/dto/token_pair_dto.dart';
 import 'package:dalm/core/storage/token_storage.dart';
 import 'package:dalm/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:dalm/features/auth/data/dtos/auth_login_result_dto.dart';
 import 'package:dalm/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:dalm/core/network/dto/token_pair_dto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,10 +23,11 @@ void main() {
     });
 
     final dataSource = DioAuthRemoteDataSource(dio);
-    final tokens = await dataSource.loginWithApple('apple-identity-token');
+    final result = await dataSource.loginWithApple('apple-identity-token');
 
-    expect(tokens.accessToken, 'dalm-access-token');
-    expect(tokens.refreshToken, 'dalm-refresh-token');
+    expect(result.tokens.accessToken, 'dalm-access-token');
+    expect(result.tokens.refreshToken, 'dalm-refresh-token');
+    expect(result.onboardingRequired, isTrue);
 
     dio.close(force: true);
   });
@@ -43,10 +45,11 @@ void main() {
 
     final dataSource = DioAuthRemoteDataSource(dio);
 
-    final tokens = await dataSource.loginWithKakao('kakao-access-token');
+    final result = await dataSource.loginWithKakao('kakao-access-token');
 
-    expect(tokens.accessToken, 'dalm-access-token');
-    expect(tokens.refreshToken, 'dalm-refresh-token');
+    expect(result.tokens.accessToken, 'dalm-access-token');
+    expect(result.tokens.refreshToken, 'dalm-refresh-token');
+    expect(result.onboardingRequired, isTrue);
 
     dio.close(force: true);
   });
@@ -102,22 +105,28 @@ final class _FakeHttpClientAdapter implements HttpClientAdapter {
 
 final class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   @override
-  Future<TokenPairDto> loginWithApple(String identityToken) async {
+  Future<AuthLoginResultDto> loginWithApple(String identityToken) async {
     expect(identityToken, 'apple-identity-token');
 
-    return const TokenPairDto(
-      accessToken: 'dalm-access-token',
-      refreshToken: 'dalm-refresh-token',
+    return const AuthLoginResultDto(
+      onboardingRequired: true,
+      tokens: TokenPairDto(
+        accessToken: 'dalm-access-token',
+        refreshToken: 'dalm-refresh-token',
+      ),
     );
   }
 
   @override
-  Future<TokenPairDto> loginWithKakao(String kakaoAccessToken) async {
+  Future<AuthLoginResultDto> loginWithKakao(String kakaoAccessToken) async {
     expect(kakaoAccessToken, 'kakao-access-token');
 
-    return const TokenPairDto(
-      accessToken: 'dalm-access-token',
-      refreshToken: 'dalm-refresh-token',
+    return const AuthLoginResultDto(
+      onboardingRequired: true,
+      tokens: TokenPairDto(
+        accessToken: 'dalm-access-token',
+        refreshToken: 'dalm-refresh-token',
+      ),
     );
   }
 }

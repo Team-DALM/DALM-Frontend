@@ -49,7 +49,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       try {
         // Refresh Token으로 새 로그인 토큰 발급
         await ref.read(tokenRefresherProvider).refreshTokens();
-        return AppRoutes.onboarding;
+        return AppRoutes.home;
       } on DioException catch (error) {
         final statusCode = error.response?.statusCode;
 

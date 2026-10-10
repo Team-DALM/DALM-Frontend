@@ -2,6 +2,7 @@ import 'package:dalm/core/error/network_exception.dart';
 import 'package:dalm/features/auth/data/providers/auth_data_providers.dart';
 import 'package:dalm/features/auth/domain/repositories/apple_auth_repository.dart';
 import 'package:dalm/features/auth/domain/repositories/kakao_auth_repository.dart';
+import 'package:dalm/features/onboarding/data/providers/onboarding_data_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final loginViewModelProvider =
@@ -49,7 +50,12 @@ final class LoginViewModel extends Notifier<bool> {
       }
 
       // identityToken으로 DALM 서버 로그인
-      await authRepository.loginWithApple(identityToken);
+      final onboardingRequired = await authRepository.loginWithApple(
+        identityToken,
+      );
+      if (onboardingRequired) {
+        await ref.read(onboardingRepositoryProvider).complete();
+      }
 
       return AppleLoginResult.authenticated;
     } on AppleLoginCancelledException {
@@ -90,7 +96,12 @@ final class LoginViewModel extends Notifier<bool> {
       final kakaoAccessToken = await kakaoRepository.login();
 
       // 카카오 액세스 토큰으로 DALM 서버 로그인
-      await authRepository.loginWithKakao(kakaoAccessToken);
+      final onboardingRequired = await authRepository.loginWithKakao(
+        kakaoAccessToken,
+      );
+      if (onboardingRequired) {
+        await ref.read(onboardingRepositoryProvider).complete();
+      }
 
       return KakaoLoginResult.authenticated;
     } on KakaoLoginCancelledException {
