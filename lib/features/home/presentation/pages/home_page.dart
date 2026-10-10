@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../app/theme/dalm_colors.dart';
+import '../../../../core/widgets/dalm_app_bar.dart';
 import '../view_models/home_view_model.dart';
 import '../widgets/home_content.dart';
 
@@ -13,9 +15,13 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final homeState = ref.watch(homeViewModelProvider);
 
-    return SafeArea(
-      bottom: false,
-      child: homeState.when(
+    return Scaffold(
+      backgroundColor: DalmColors.background,
+      appBar: DalmAppBar(
+        title: 'DALM',
+        infoLabel: _formatDate(DateTime.now()),
+      ),
+      body: homeState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => _HomeErrorView(
           message: error.toString(),
@@ -41,6 +47,29 @@ class HomePage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime dateTime) {
+    const monthNames = [
+      'JAN',
+      'FEB',
+      'MAR',
+      'APR',
+      'MAY',
+      'JUN',
+      'JUL',
+      'AUG',
+      'SEP',
+      'OCT',
+      'NOV',
+      'DEC',
+    ];
+
+    final localDate = dateTime.toLocal();
+    final month = monthNames[localDate.month - 1];
+    final day = localDate.day.toString().padLeft(2, '0');
+
+    return '$month $day';
   }
 }
 
