@@ -9,7 +9,6 @@ import 'package:dalm/features/photo/presentation/views/photo_record_screen.dart'
 import 'package:dalm/features/photo/presentation/views/photo_rejected_screen.dart';
 import 'package:dalm/features/photo/presentation/views/photo_upload_failure_screen.dart';
 import 'package:dalm/features/photo/presentation/views/photo_upload_screen.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -59,18 +58,13 @@ final photoRootRoutes = <RouteBase>[
   GoRoute(
     path: AppRoutes.photoUploadFailure,
     redirect: (context, state) {
-      // TODO: 업로드 실패 화면 확인 후 디버그 예외 제거
-      if (kDebugMode) return null;
       return state.extra is PhotoUploadFailureRouteArgs
           ? null
           : AppRoutes.photoUpload;
     },
     builder: (context, state) {
-      final args = state.extra;
-      return PhotoUploadFailureScreen(
-        imagePath: args is PhotoUploadFailureRouteArgs ? args.imagePath : '',
-        deleteImageOnDispose: args is PhotoUploadFailureRouteArgs,
-      );
+      final args = state.extra! as PhotoUploadFailureRouteArgs;
+      return PhotoUploadFailureScreen(imagePath: args.imagePath);
     },
   ),
   GoRoute(
