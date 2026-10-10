@@ -62,8 +62,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           return AppRoutes.onboarding;
         }
 
-        // 일시적인 네트워크 오류 시 로그인 상태 유지
-        return AppRoutes.home;
+        // 일시적인 네트워크 오류에도 소개 온보딩으로 이동
+        return AppRoutes.onboarding;
       } on StateError {
         return AppRoutes.onboarding;
       }

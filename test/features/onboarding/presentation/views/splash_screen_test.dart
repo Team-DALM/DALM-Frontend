@@ -23,7 +23,7 @@ void main() {
     expect(find.text('ONBOARDING'), findsOneWidget);
   });
 
-  testWidgets('토큰 재발급에 성공하면 새 토큰을 저장하고 홈으로 이동한다', (tester) async {
+  testWidgets('토큰 재발급에 성공하면 홈으로 이동한다', (tester) async {
     final tokenStorage = _MemoryTokenStorage(refreshToken: 'old-refresh-token');
     final dio = _createRefreshDio((options) {
       expect(options.uri.path, '/v1/auth/refresh');
