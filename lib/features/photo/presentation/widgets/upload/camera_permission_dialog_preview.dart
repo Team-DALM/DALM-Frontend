@@ -1,6 +1,6 @@
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_theme.dart';
-import 'package:dalm/features/photo/presentation/widgets/camera_permission_dialog.dart';
+import 'package:dalm/features/photo/presentation/widgets/upload/camera_permission_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 

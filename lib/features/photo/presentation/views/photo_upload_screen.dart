@@ -6,11 +6,11 @@ import 'package:dalm/core/widgets/dalm_app_bar.dart';
 import 'package:dalm/features/photo/domain/entities/photo_camera_permission_status.dart';
 import 'package:dalm/features/photo/presentation/view_models/photo_camera_view_model.dart';
 import 'package:dalm/features/photo/presentation/view_models/photo_library_view_model.dart';
-import 'package:dalm/features/photo/presentation/widgets/camera_permission_dialog.dart';
-import 'package:dalm/features/photo/presentation/widgets/camera_settings_dialog.dart';
-import 'package:dalm/features/photo/presentation/widgets/photo_empty_placeholder.dart';
-import 'package:dalm/features/photo/presentation/widgets/photo_lost_data_recovery.dart';
-import 'package:dalm/features/photo/presentation/widgets/photo_source_action_card.dart';
+import 'package:dalm/features/photo/presentation/widgets/upload/camera_permission_dialog.dart';
+import 'package:dalm/features/photo/presentation/widgets/upload/camera_settings_dialog.dart';
+import 'package:dalm/features/photo/presentation/widgets/upload/photo_empty_placeholder.dart';
+import 'package:dalm/features/photo/presentation/widgets/upload/photo_lost_data_recovery.dart';
+import 'package:dalm/features/photo/presentation/widgets/upload/photo_source_action_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
