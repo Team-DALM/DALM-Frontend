@@ -1,5 +1,5 @@
 abstract interface class AuthRepository {
-  Future<void> loginWithApple(String identityToken);
+  Future<bool> loginWithApple(String identityToken);
 
-  Future<void> loginWithKakao(String kakaoAccessToken);
+  Future<bool> loginWithKakao(String kakaoAccessToken);
 }
