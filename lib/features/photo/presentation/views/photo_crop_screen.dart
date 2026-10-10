@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
+import 'package:dalm/core/error/network_exception.dart';
 import 'package:dalm/features/photo/presentation/view_models/photo_upload_view_model.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_crop_toolbar.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_crop_viewport.dart';
@@ -74,8 +75,14 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
             .uploadPhoto(outputPath);
 
         if (mounted) Navigator.of(context).pop(result);
-      } catch (_) {
-        if (mounted) _showUploadFailure();
+      } on NetworkException catch (error, stackTrace) {
+        _logUploadFailure(error, stackTrace);
+        if (mounted) _showUploadFailure(_uploadFailureMessage(error));
+      } on Object catch (error, stackTrace) {
+        _logUploadFailure(error, stackTrace);
+        if (mounted) {
+          _showUploadFailure('사진을 처리하지 못했어요. 다시 시도해 주세요.');
+        }
       } finally {
         await _deleteTemporaryFile(outputPath);
       }
@@ -126,12 +133,44 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
       );
   }
 
-  void _showUploadFailure() {
+  String _uploadFailureMessage(NetworkException error) {
+    if (error.statusCode == 401 || error.statusCode == 403) {
+      return '로그인 정보가 만료됐어요. 다시 로그인해 주세요.';
+    }
+    if (error.statusCode == 422) {
+      return error.message;
+    }
+
+    return switch (error.type) {
+      NetworkExceptionType.connection ||
+      NetworkExceptionType.connectionTimeout ||
+      NetworkExceptionType.sendTimeout ||
+      NetworkExceptionType.receiveTimeout => '네트워크 연결을 확인한 후 다시 시도해 주세요.',
+      NetworkExceptionType.cancelled => '사진 등록이 취소됐어요.',
+      _ => error.message,
+    };
+  }
+
+  void _logUploadFailure(Object error, StackTrace stackTrace) {
+    if (error is NetworkException) {
+      debugPrint(
+        '[PhotoUpload] failed '
+        'type=${error.type.name} '
+        'status=${error.statusCode} '
+        'code=${error.code} '
+        'requestId=${error.requestId} '
+        'message=${error.message}',
+      );
+    } else {
+      debugPrint('[PhotoUpload] unexpected error: $error');
+    }
+    debugPrintStack(stackTrace: stackTrace);
+  }
+
+  void _showUploadFailure(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('사진을 등록하지 못했어요. 다시 시도해 주세요.')),
-      );
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _setImageReady(bool isReady) {
