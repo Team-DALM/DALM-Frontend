@@ -10,9 +10,12 @@ abstract final class DalmColors {
   static const surfaceMuted = DalmPalette.cream;
   static const textPrimary = DalmPalette.deepInk;
   static const textSecondary = DalmPalette.secondary;
+  static const textWarm = DalmPalette.warmSecondary;
+  static const textInk = DalmPalette.ink;
   static const textDisabled = DalmPalette.disabled;
   static const textInverse = DalmPalette.white;
   static const border = DalmPalette.border;
+  static const warmBorder = DalmPalette.warmBorder;
   static const navigationInactive = DalmPalette.stone;
 
   static const primaryAction = DalmPalette.deepInk;
@@ -27,4 +30,10 @@ abstract final class DalmColors {
   static const kakaoText = DalmPalette.kakaoText;
 
   static const overlay = Color(0x66000000);
+
+  // 사진 편집 화면
+  static const photoEditorBackground = DalmPalette.deepInk;
+  static const photoEditorSurface = DalmPalette.ink;
+  static const photoEditorTextSecondary = DalmPalette.disabled;
+  static const photoEditorDivider = DalmPalette.ink;
 }

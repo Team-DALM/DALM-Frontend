@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/app_routes.dart';
 import '../../../../app/theme/dalm_colors.dart';
 import '../../../../core/widgets/dalm_app_bar.dart';
 import '../view_models/home_view_model.dart';
@@ -33,7 +35,8 @@ class HomePage extends ConsumerWidget {
             return ref.read(homeViewModelProvider.notifier).refresh();
           },
           onPhotoUpload: () {
-            // TODO: 사진 등록 화면 이동
+            // 오늘의 사진 등록 화면으로 이동
+            context.push(AppRoutes.photoUpload);
           },
           onMatchTap: (matchId) {
             // TODO: 매칭 결과 화면 이동
