@@ -14,5 +14,8 @@ abstract final class AppRoutes {
   static const photoUpload = '/photo/upload'; // 사진 업로드 화면
   static const photoCrop = '/photo/crop'; // 사진 4:5 맞추기 화면
   static const photoAnalysis = '/photo/analysis'; // 사진 AI 분석 진행 화면
+  static const photoRecord = '/photo/record'; // 사진 분석 완료 화면
+  static const photoUploadFailure = '/photo/upload/failure'; // 사진 업로드 실패 화면
+  static const photoRejected = '/photo/rejected'; // 사진 AI 검증 실패 화면
   static const matching = '/matching'; // 매칭 화면
 }

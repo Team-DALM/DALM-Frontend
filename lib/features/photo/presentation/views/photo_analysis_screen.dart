@@ -2,13 +2,17 @@ import 'dart:io';
 
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
+import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
 import 'package:dalm/features/photo/data/providers/photo_analysis_providers.dart';
 import 'package:dalm/features/photo/domain/entities/photo_analysis_progress.dart';
+import 'package:dalm/features/photo/presentation/routes/photo_record_route_args.dart';
+import 'package:dalm/features/photo/presentation/routes/photo_rejected_route_args.dart';
 import 'package:dalm/features/photo/presentation/widgets/analysis/photo_analysis_image.dart';
 import 'package:dalm/features/photo/presentation/widgets/analysis/photo_analysis_steps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
   const PhotoAnalysisScreen({
@@ -28,9 +32,13 @@ class PhotoAnalysisScreen extends ConsumerStatefulWidget {
 }
 
 class _PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
+  bool _transferredImage = false;
+
   @override
   void dispose() {
-    if (widget.deleteImageOnDispose) _deleteTemporaryImage();
+    if (widget.deleteImageOnDispose && !_transferredImage) {
+      _deleteTemporaryImage();
+    }
     super.dispose();
   }
 
@@ -45,6 +53,36 @@ class _PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(photoAnalysisProgressProvider(widget.photoId), (previous, next) {
+      final progress = next.value;
+      if (progress == null || progress.progress < 1 || _transferredImage) {
+        return;
+      }
+
+      switch (progress.status) {
+        case PhotoAnalysisStatus.searching:
+          _transferredImage = true;
+          context.pushReplacement(
+            AppRoutes.photoRecord,
+            extra: PhotoRecordRouteArgs(
+              imagePath: widget.imagePath,
+              photoId: widget.photoId,
+            ),
+          );
+        case PhotoAnalysisStatus.rejected:
+          _transferredImage = true;
+          context.pushReplacement(
+            AppRoutes.photoRejected,
+            extra: PhotoRejectedRouteArgs(
+              imagePath: widget.imagePath,
+              photoId: widget.photoId,
+            ),
+          );
+        case PhotoAnalysisStatus.validating:
+          break;
+      }
+    });
+
     final analysisState = ref.watch(
       photoAnalysisProgressProvider(widget.photoId),
     );
@@ -71,7 +109,7 @@ class _PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
         top: false,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final imageWidth = (constraints.maxWidth - 112).clamp(220.0, 280.0);
+            const imageWidth = 280.0;
 
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
@@ -90,7 +128,7 @@ class _PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                         imagePath: widget.imagePath,
                         progress: analysis.progress,
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 30),
                       Text(
                         isRejected
                             ? '사진을 충분히 읽지 못했어요.'
@@ -103,7 +141,7 @@ class _PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                           color: DalmColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 9),
                       Text(
                         isRejected
                             ? '다른 사진으로 다시 시도해 주세요.'
