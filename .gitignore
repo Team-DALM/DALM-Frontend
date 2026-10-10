@@ -24,6 +24,7 @@ migrate_working_dir/
 #.vscode/
 
 # Flutter/Dart/Pub related
+.env
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -46,3 +47,4 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+devtools_options.yaml
