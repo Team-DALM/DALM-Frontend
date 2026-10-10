@@ -23,7 +23,7 @@ void main() {
     expect(find.text('ONBOARDING'), findsOneWidget);
   });
 
-  testWidgets('토큰 재발급에 성공해도 소개 온보딩으로 이동한다', (tester) async {
+  testWidgets('토큰 재발급에 성공하면 홈으로 이동한다', (tester) async {
     final tokenStorage = _MemoryTokenStorage(refreshToken: 'old-refresh-token');
     final dio = _createRefreshDio((options) {
       expect(options.uri.path, '/v1/auth/refresh');
@@ -40,7 +40,7 @@ void main() {
 
     await _pumpSplash(tester, tokenStorage: tokenStorage, refreshDio: dio);
 
-    expect(find.text('ONBOARDING'), findsOneWidget);
+    expect(find.text('HOME'), findsOneWidget);
     expect(tokenStorage.accessToken, 'new-access-token');
     expect(tokenStorage.refreshToken, 'new-refresh-token');
 
