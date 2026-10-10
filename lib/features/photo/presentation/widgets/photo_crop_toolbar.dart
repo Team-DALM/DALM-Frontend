@@ -19,14 +19,14 @@ class PhotoCropToolbar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _CropToolButton(
-          icon: Icons.refresh_rounded,
+          icon: Icons.history,
           label: '초기화',
           tooltip: '사진 위치 초기화',
           onPressed: onReset,
         ),
         const _AspectRatioIndicator(),
         _CropToolButton(
-          icon: Icons.crop_free_rounded,
+          icon: Icons.crop_rotate,
           label: '회전',
           tooltip: '사진 90도 회전',
           onPressed: onRotate,
