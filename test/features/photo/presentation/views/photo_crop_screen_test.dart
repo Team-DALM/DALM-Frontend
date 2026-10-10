@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dalm/features/photo/presentation/views/photo_crop_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -30,7 +31,9 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      MaterialApp(home: PhotoCropScreen(imagePath: imageFile.path)),
+      ProviderScope(
+        child: MaterialApp(home: PhotoCropScreen(imagePath: imageFile.path)),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -57,7 +60,9 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      MaterialApp(home: PhotoCropScreen(imagePath: imageFile.path)),
+      ProviderScope(
+        child: MaterialApp(home: PhotoCropScreen(imagePath: imageFile.path)),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -77,7 +82,9 @@ void main() {
         '${tempDirectory.path}${Platform.pathSeparator}missing.png';
 
     await tester.pumpWidget(
-      MaterialApp(home: PhotoCropScreen(imagePath: missingPath)),
+      ProviderScope(
+        child: MaterialApp(home: PhotoCropScreen(imagePath: missingPath)),
+      ),
     );
     await tester.pumpAndSettle();
 

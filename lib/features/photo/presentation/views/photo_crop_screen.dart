@@ -3,23 +3,25 @@ import 'dart:ui' as ui;
 
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
+import 'package:dalm/features/photo/presentation/view_models/photo_upload_view_model.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_crop_toolbar.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_crop_viewport.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 선택한 사진을 4:5 비율로 맞추는 화면
-class PhotoCropScreen extends StatefulWidget {
+class PhotoCropScreen extends ConsumerStatefulWidget {
   const PhotoCropScreen({super.key, required this.imagePath, this.onCompleted});
 
   final String imagePath;
   final ValueChanged<String>? onCompleted;
 
   @override
-  State<PhotoCropScreen> createState() => _PhotoCropScreenState();
+  ConsumerState<PhotoCropScreen> createState() => _PhotoCropScreenState();
 }
 
-class _PhotoCropScreenState extends State<PhotoCropScreen> {
+class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
   final _cropBoundaryKey = GlobalKey();
   final _transformationController = TransformationController();
 
@@ -51,20 +53,43 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
 
     setState(() => _isExporting = true);
 
-    String? outputPath;
     try {
-      outputPath = await _exportCroppedPhoto();
-    } catch (_) {
-      if (mounted) _showExportFailure();
+      late final String outputPath;
+      try {
+        outputPath = await _exportCroppedPhoto();
+      } catch (_) {
+        if (mounted) _showExportFailure();
+        return;
+      }
+
+      if (!mounted) return;
+      if (widget.onCompleted case final callback?) {
+        callback(outputPath);
+        return;
+      }
+
+      try {
+        final result = await ref
+            .read(photoUploadViewModelProvider)
+            .uploadPhoto(outputPath);
+
+        if (mounted) Navigator.of(context).pop(result);
+      } catch (_) {
+        if (mounted) _showUploadFailure();
+      } finally {
+        await _deleteTemporaryFile(outputPath);
+      }
     } finally {
       if (mounted) setState(() => _isExporting = false);
     }
+  }
 
-    if (!mounted || outputPath == null) return;
-    if (widget.onCompleted case final callback?) {
-      callback(outputPath);
-    } else {
-      Navigator.of(context).pop(outputPath);
+  Future<void> _deleteTemporaryFile(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) await file.delete();
+    } on FileSystemException {
+      // 임시 파일 삭제 실패는 업로드 결과에 영향 없음
     }
   }
 
@@ -76,7 +101,8 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
             as RenderRepaintBoundary?;
     if (boundary == null) throw StateError('Crop boundary is unavailable.');
 
-    final image = await boundary.toImage(pixelRatio: 3);
+    // 330 x 412.5 영역을 1320 x 1650의 정확한 4:5 비율로 출력
+    final image = await boundary.toImage(pixelRatio: 4);
     try {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) throw StateError('Crop image encoding failed.');
@@ -97,6 +123,14 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         const SnackBar(content: Text('사진을 저장하지 못했어요. 다시 시도해 주세요.')),
+      );
+  }
+
+  void _showUploadFailure() {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(content: Text('사진을 등록하지 못했어요. 다시 시도해 주세요.')),
       );
   }
 
