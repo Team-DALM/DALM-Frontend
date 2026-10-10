@@ -184,7 +184,19 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
                               color: DalmColors.photoEditorTextSecondary,
                             ),
                           ),
-                          const SizedBox(height: 54),
+                          const SizedBox(height: 37),
+                          SizedBox(
+                            width: (cropAreaWidth - 44).clamp(0.0, 346.0),
+                            child: Divider(
+                              key: const Key('photoCropToolbarDivider'),
+                              height: 1,
+                              thickness: 1,
+                              color: DalmColors.textInverse.withValues(
+                                alpha: 0.18,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                           SizedBox(
                             width: cropAreaWidth,
                             child: PhotoCropToolbar(

@@ -42,6 +42,7 @@ void main() {
     expect(find.text('4 : 5'), findsOneWidget);
     expect(find.text('초기화'), findsOneWidget);
     expect(find.text('회전'), findsOneWidget);
+    expect(find.byKey(const Key('photoCropToolbarDivider')), findsOneWidget);
 
     final viewportSize = tester.getSize(
       find.byKey(const Key('photoCropViewport')),
