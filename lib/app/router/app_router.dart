@@ -14,7 +14,8 @@ import 'dalm_navigation_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
-    initialLocation: AppRoutes.splash,
+    // TODO: 업로드 실패 화면 확인 후 AppRoutes.splash로 되돌리기
+    initialLocation: AppRoutes.photoUploadFailure,
     routes: [
       // 바텀 네비게이션 없이 열리는 화면
       ...authRootRoutes,

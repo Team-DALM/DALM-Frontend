@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dalm/app/theme/dalm_colors.dart';
+import 'package:dalm/core/widgets/dalm_photo_frame.dart';
 import 'package:flutter/material.dart';
 
 class PhotoUploadFailureImage extends StatelessWidget {
@@ -18,31 +19,12 @@ class PhotoUploadFailureImage extends StatelessWidget {
     return SizedBox(
       key: const Key('photoUploadFailureImage'),
       width: width,
-      child: AspectRatio(
-        aspectRatio: 4 / 5,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.file(
-                File(imagePath),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const ColoredBox(
-                    color: DalmColors.surfaceMuted,
-                    child: Center(
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                        color: DalmColors.textDisabled,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              ColoredBox(color: DalmColors.background.withValues(alpha: 0.38)),
-            ],
-          ),
+      child: DalmPhotoFrame(
+        image: FileImage(File(imagePath)),
+        borderRadius: BorderRadius.circular(6),
+        semanticLabel: '업로드하지 못한 오늘의 장면',
+        overlay: ColoredBox(
+          color: DalmColors.background.withValues(alpha: 0.38),
         ),
       ),
     );

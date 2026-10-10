@@ -5,6 +5,7 @@ import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
 import 'package:dalm/core/widgets/dalm_button.dart';
+import 'package:dalm/core/widgets/dalm_photo_frame.dart';
 import 'package:dalm/features/photo/presentation/widgets/analysis/photo_search_progress_card.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -79,26 +80,10 @@ class _PhotoRecordScreenState extends State<PhotoRecordScreen> {
               SizedBox(
                 key: const Key('photoRecordImage'),
                 width: 200,
-                child: AspectRatio(
-                  aspectRatio: 4 / 5,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.file(
-                      File(widget.imagePath),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const ColoredBox(
-                          color: DalmColors.surfaceMuted,
-                          child: Center(
-                            child: Icon(
-                              Icons.image_not_supported_outlined,
-                              color: DalmColors.textDisabled,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                child: DalmPhotoFrame(
+                  image: FileImage(File(widget.imagePath)),
+                  borderRadius: BorderRadius.circular(6),
+                  semanticLabel: '오늘 기록으로 남긴 장면',
                 ),
               ),
               const SizedBox(height: 38),

@@ -103,14 +103,14 @@ class _PhotoUploadFailureScreenState
                   children: [
                     Image.asset(
                       'assets/icons/photo_upload_failure.png',
-                      width: 72,
-                      height: 72,
+                      width: 76,
+                      height: 76,
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 14),
                     Text(
                       '사진을 남기지 못했어요.',
                       style: DalmTypography.serifHeadline.copyWith(
-                        fontSize: 22,
+                        fontSize: 23,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -122,9 +122,9 @@ class _PhotoUploadFailureScreenState
                         color: DalmColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 42),
+                    const SizedBox(height: 45),
                     PhotoUploadFailureImage(imagePath: widget.imagePath),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: 28),
                     Row(
                       children: [
                         Expanded(
