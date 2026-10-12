@@ -62,7 +62,7 @@ class ProfileScreen extends StatelessWidget {
               icon: const Icon(
                 Icons.notifications_none_rounded,
                 color: DalmColors.textPrimary,
-                size: 24,
+                size: 26,
               ),
               onTap: () =>
                   context.push(ProfileRouteLocations.notificationSettings),
