@@ -19,13 +19,13 @@ class ProfileCompositionCard extends StatelessWidget {
             value: 0.68,
             color: DalmProfileColors.analysisGold,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 23),
           const _CompositionRow(
             label: '대각선 구도',
             value: 0.54,
             color: DalmProfileColors.analysisBlue,
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 16),
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
