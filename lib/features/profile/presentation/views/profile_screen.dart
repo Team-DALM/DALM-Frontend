@@ -1,70 +1,85 @@
-import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
-import 'package:dalm/core/storage/token_storage_provider.dart';
-import 'package:dalm/core/widgets/dalm_button.dart';
+import 'package:dalm/core/widgets/dalm_app_bar.dart';
+import 'package:dalm/features/profile/presentation/routes/profile_routes.dart';
+import 'package:dalm/features/profile/presentation/widgets/profile_recent_records.dart';
+import 'package:dalm/features/profile/presentation/widgets/profile_settings_tile.dart';
+import 'package:dalm/features/profile/presentation/widgets/profile_stats.dart';
+import 'package:dalm/features/profile/presentation/widgets/profile_traveler_card.dart';
+import 'package:dalm/features/profile/presentation/widgets/profile_vision_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfileScreen extends ConsumerStatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
-
-  @override
-  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  bool _isLoggingOut = false;
-
-  Future<void> _logout() async {
-    if (_isLoggingOut) return;
-
-    setState(() => _isLoggingOut = true);
-
-    try {
-      // 저장된 로그인 토큰 삭제
-      await ref.read(tokenStorageProvider).clearTokens();
-
-      if (!mounted) return;
-
-      // 로그아웃 성공 시 로그인 화면으로 이동
-      context.go(AppRoutes.login);
-    } on Object {
-      if (!mounted) return;
-
-      setState(() => _isLoggingOut = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('로그아웃에 실패했어요. 다시 시도해주세요.')));
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: DalmColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '마이페이지',
-                style: DalmTypography.serifHeadline.copyWith(
-                  color: DalmColors.textPrimary,
-                ),
+      appBar: DalmAppBar(
+        title: 'PARALLEL',
+        actionLabel: '설정',
+        onActionPressed: () =>
+            context.push(ProfileRouteLocations.accountSettings),
+        dividerIndent: 20,
+        titleStyle: DalmTypography.caption.copyWith(
+          color: DalmColors.textPrimary,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.2,
+        ),
+      ),
+      body: SingleChildScrollView(
+        key: const Key('profile-scroll-view'),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '나의 시선',
+              style: DalmTypography.serifHeadline.copyWith(
+                color: DalmColors.textPrimary,
+                fontSize: 26,
               ),
-              const Spacer(),
-              DalmButton(
-                label: '로그아웃',
-                onPressed: _logout,
-                variant: DalmButtonVariant.secondary,
-                isLoading: _isLoggingOut,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 13),
+            ProfileTravelerCard(
+              onTap: () => context.push(ProfileRouteLocations.insight),
+            ),
+            const SizedBox(height: 19),
+            ProfileVisionCard(
+              onTap: () => context.push(ProfileRouteLocations.insight),
+            ),
+            const SizedBox(height: 24),
+            const ProfileStats(),
+            const SizedBox(height: 22),
+            const ProfileRecentRecords(),
+            const SizedBox(height: 28),
+            ProfileSettingsTile(
+              key: const Key('notification-settings-tile'),
+              label: '알림 설정',
+              icon: Icons.notifications_none_rounded,
+              onTap: () =>
+                  context.push(ProfileRouteLocations.notificationSettings),
+            ),
+            const SizedBox(height: 9),
+            ProfileSettingsTile(
+              key: const Key('privacy-settings-tile'),
+              label: '개인정보 설정',
+              icon: Icons.shield_outlined,
+              onTap: () =>
+                  context.push(ProfileRouteLocations.privacySettings),
+            ),
+            const SizedBox(height: 9),
+            ProfileSettingsTile(
+              key: const Key('account-settings-tile'),
+              label: '계정 설정',
+              icon: Icons.account_circle_outlined,
+              onTap: () =>
+                  context.push(ProfileRouteLocations.accountSettings),
+            ),
+          ],
         ),
       ),
     );
