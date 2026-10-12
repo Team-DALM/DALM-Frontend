@@ -11,7 +11,7 @@ class ProfileSettingsTile extends StatelessWidget {
   });
 
   final String label;
-  final IconData icon;
+  final Widget icon;
   final VoidCallback onTap;
 
   @override
@@ -26,10 +26,9 @@ class ProfileSettingsTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
           child: Row(
             children: [
-              Icon(
-                icon,
-                color: DalmColors.textPrimary,
-                size: 22,
+              SizedBox.square(
+                dimension: 24,
+                child: Center(child: icon),
               ),
               const SizedBox(width: 16),
               Expanded(

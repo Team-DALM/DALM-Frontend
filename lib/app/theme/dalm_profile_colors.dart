@@ -9,4 +9,8 @@ abstract final class DalmProfileColors {
   static const cardAccent = Color(0xFFD4BD8A);
   static const cardDivider = Color(0x33FFFFFF);
   static const chipBackground = Color(0x1FFFFFFF);
+  static const analysisTrack = Color(0xFFD8D5CF);
+  static const analysisBlue = Color(0xFF6D7FA6);
+  static const analysisGold = Color(0xFFCDAA62);
+  static const analysisCoral = Color(0xFFEB8870);
 }

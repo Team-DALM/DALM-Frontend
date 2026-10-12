@@ -1,6 +1,7 @@
 import 'package:dalm/app/router/app_placeholder_page.dart';
 import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/features/profile/presentation/views/profile_screen.dart';
+import 'package:dalm/features/profile/presentation/views/profile_vision_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 
 abstract final class ProfileRouteLocations {
@@ -24,7 +25,7 @@ final profileRootRoutes = <RouteBase>[
   GoRoute(
     path: ProfileRouteLocations.insight,
     builder: (context, state) {
-      return const AppPlaceholderPage(title: '나의 시선 분석');
+      return const ProfileVisionDetailScreen();
     },
   ),
   GoRoute(
