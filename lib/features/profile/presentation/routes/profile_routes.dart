@@ -2,6 +2,7 @@ import 'package:dalm/app/router/app_placeholder_page.dart';
 import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/features/profile/presentation/views/profile_screen.dart';
 import 'package:dalm/features/profile/presentation/views/profile_account_screen.dart';
+import 'package:dalm/features/profile/presentation/views/profile_privacy_screen.dart';
 import 'package:dalm/features/profile/presentation/views/profile_vision_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -38,7 +39,7 @@ final profileRootRoutes = <RouteBase>[
   GoRoute(
     path: ProfileRouteLocations.privacySettings,
     builder: (context, state) {
-      return const AppPlaceholderPage(title: '개인정보 및 안전');
+      return const ProfilePrivacyScreen();
     },
   ),
   GoRoute(
