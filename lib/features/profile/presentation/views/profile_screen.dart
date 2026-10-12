@@ -20,8 +20,7 @@ class ProfileScreen extends StatelessWidget {
       appBar: DalmAppBar(
         title: 'PARALLEL',
         actionLabel: '설정',
-        onActionPressed: () =>
-            context.push(ProfileRouteLocations.accountSettings),
+        onActionPressed: () {},
         dividerIndent: 20,
         titleStyle: DalmTypography.caption.copyWith(
           color: DalmColors.textPrimary,
@@ -45,7 +44,8 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 13),
             ProfileTravelerCard(
-              onTap: () => context.push(ProfileRouteLocations.insight),
+              onTap: () =>
+                  context.push(ProfileRouteLocations.accountSettings),
             ),
             const SizedBox(height: 19),
             ProfileVisionCard(
