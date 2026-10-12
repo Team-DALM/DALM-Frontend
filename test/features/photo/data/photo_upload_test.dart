@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:dalm/features/photo/data/datasources/photo_remote_data_source.dart';
 import 'package:dalm/features/photo/data/dtos/create_photo_data_dto.dart';
 import 'package:dalm/features/photo/data/repositories/photo_upload_repository_impl.dart';
+import 'package:dalm/features/photo/domain/entities/photo_upload_status.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -45,7 +46,7 @@ void main() {
     final result = await dataSource.uploadPhoto(image.path);
 
     expect(result.photoId, '9e5cd816-69af-4db8-a626-4a723c33fa77');
-    expect(result.status, 'VALIDATING');
+    expect(result.status, PhotoUploadStatus.validating);
     expect(result.registeredAt, DateTime.utc(2026, 10, 10, 3, 20));
   });
 
@@ -55,8 +56,18 @@ void main() {
     final result = await repository.uploadPhoto('/tmp/crop.png');
 
     expect(result.photoId, 'photo-id');
-    expect(result.status, 'VALIDATING');
+    expect(result.status, PhotoUploadStatus.validating);
     expect(result.registeredAt, DateTime.utc(2026, 10, 10));
+  });
+
+  test('알 수 없는 사진 상태는 unknown으로 안전하게 변환한다', () {
+    final dto = CreatePhotoDataDto.fromJson({
+      'photo_id': 'photo-id',
+      'status': 'NEW_SERVER_STATUS',
+      'registered_at': '2026-10-10T00:00:00Z',
+    });
+
+    expect(dto.status, PhotoUploadStatus.unknown);
   });
 }
 
@@ -90,7 +101,7 @@ final class _FakePhotoRemoteDataSource implements PhotoRemoteDataSource {
 
     return CreatePhotoDataDto(
       photoId: 'photo-id',
-      status: 'VALIDATING',
+      status: PhotoUploadStatus.validating,
       registeredAt: DateTime.utc(2026, 10, 10),
     );
   }

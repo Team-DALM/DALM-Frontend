@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dalm/app/theme/dalm_theme.dart';
 import 'package:dalm/features/photo/data/providers/photo_camera_providers.dart';
 import 'package:dalm/features/photo/data/providers/photo_library_providers.dart';
@@ -104,6 +106,32 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(recoveredPath, '/tmp/recovered-photo.jpg');
+  });
+
+  testWidgets('사진 선택기가 열려 있는 동안 중복 실행을 막는다', (tester) async {
+    final repository = _PendingPhotoLibraryRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          photoLibraryRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          theme: DalmTheme.light,
+          home: const PhotoUploadScreen(),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.text('앨범에서 선택하기'));
+    await tester.tap(find.text('앨범에서 선택하기'));
+    await tester.pump();
+    await tester.tap(find.text('앨범에서 선택하기'));
+    await tester.pump();
+
+    expect(repository.selectPhotoCount, 1);
+    repository.complete();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('시스템 카메라 권한을 거절하면 권한 안내를 표시한다', (tester) async {
@@ -287,4 +315,20 @@ final class _FakePhotoLibraryRepository implements PhotoLibraryRepository {
 
   @override
   Future<String?> retrieveLostPhoto() async => recoveredPhotoPath;
+}
+
+final class _PendingPhotoLibraryRepository implements PhotoLibraryRepository {
+  final _selection = Completer<String?>();
+  int selectPhotoCount = 0;
+
+  void complete() => _selection.complete();
+
+  @override
+  Future<String?> selectPhoto() {
+    selectPhotoCount += 1;
+    return _selection.future;
+  }
+
+  @override
+  Future<String?> retrieveLostPhoto() async => null;
 }

@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
 import 'package:dalm/core/widgets/dalm_button.dart';
+import 'package:dalm/features/photo/data/services/photo_temporary_file_manager.dart';
 import 'package:dalm/features/photo/presentation/widgets/analysis/photo_rejected_image.dart';
 import 'package:dalm/features/photo/presentation/widgets/analysis/photo_rejection_reasons.dart';
 import 'package:flutter/material.dart';
@@ -34,12 +33,7 @@ class _PhotoRejectedScreenState extends State<PhotoRejectedScreen> {
   }
 
   Future<void> _deleteTemporaryImage() async {
-    try {
-      final file = File(widget.imagePath);
-      if (await file.exists()) await file.delete();
-    } on FileSystemException {
-      // 임시 이미지 정리 실패는 화면 이동을 막지 않는다.
-    }
+    await PhotoTemporaryFileManager.deleteOwnedFile(widget.imagePath);
   }
 
   @override
@@ -105,11 +99,13 @@ class _PhotoRejectedScreenState extends State<PhotoRejectedScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    '거절된 사진과 AI 분석 정보는 서버에 저장되지 않아요.',
-                    style: DalmTypography.caption.copyWith(
-                      fontSize: 8,
-                      color: DalmColors.textSecondary,
+                  Flexible(
+                    child: Text(
+                      '거절된 사진과 AI 분석 정보는 서버에 저장되지 않아요.',
+                      style: DalmTypography.caption.copyWith(
+                        fontSize: 11,
+                        color: DalmColors.textSecondary,
+                      ),
                     ),
                   ),
                 ],

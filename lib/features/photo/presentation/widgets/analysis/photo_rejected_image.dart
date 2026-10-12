@@ -38,7 +38,7 @@ class PhotoRejectedImage extends StatelessWidget {
                 '이 사진은 업로드되지 않았어요.',
                 textAlign: TextAlign.center,
                 style: DalmTypography.caption.copyWith(
-                  fontSize: 9,
+                  fontSize: 11,
                   color: DalmColors.textInverse,
                 ),
               ),

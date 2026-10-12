@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 카메라 촬영 또는 앨범 선택을 시작하는 사진 등록 화면
-class PhotoUploadScreen extends ConsumerWidget {
+class PhotoUploadScreen extends ConsumerStatefulWidget {
   const PhotoUploadScreen({
     super.key,
     this.onCameraPressed,
@@ -33,9 +33,26 @@ class PhotoUploadScreen extends ConsumerWidget {
   final ValueChanged<String>? onPhotoCaptured;
   final ValueChanged<String>? onPhotoSelected;
 
+  @override
+  ConsumerState<PhotoUploadScreen> createState() => _PhotoUploadScreenState();
+}
+
+class _PhotoUploadScreenState extends ConsumerState<PhotoUploadScreen> {
+  bool _isChoosingSource = false;
+
+  Future<void> _runSourceAction(Future<void> Function() action) async {
+    if (_isChoosingSource) return;
+    setState(() => _isChoosingSource = true);
+    try {
+      await action();
+    } finally {
+      if (mounted) setState(() => _isChoosingSource = false);
+    }
+  }
+
   Future<void> _openCamera(BuildContext context, WidgetRef ref) async {
-    if (onCameraPressed != null) {
-      onCameraPressed!();
+    if (widget.onCameraPressed != null) {
+      widget.onCameraPressed!();
       return;
     }
 
@@ -96,7 +113,7 @@ class PhotoUploadScreen extends ConsumerWidget {
   ) async {
     switch (result.outcome) {
       case PhotoCameraCaptureOutcome.captured:
-        onPhotoCaptured?.call(result.photoPath!);
+        widget.onPhotoCaptured?.call(result.photoPath!);
         return;
       case PhotoCameraCaptureOutcome.cancelled:
         return;
@@ -104,11 +121,11 @@ class PhotoUploadScreen extends ConsumerWidget {
         await CameraPermissionDialog.show(
           context,
           onAllow:
-              onAllowCamera ??
+              widget.onAllowCamera ??
               () {
                 unawaited(_requestPermissionAndTakePhoto(context, ref));
               },
-          onDeny: onDenyCameraPermission ?? () {},
+          onDeny: widget.onDenyCameraPermission ?? () {},
         );
         return;
       case PhotoCameraCaptureOutcome.permissionPermanentlyDenied:
@@ -145,8 +162,8 @@ class PhotoUploadScreen extends ConsumerWidget {
   }
 
   Future<void> _openGallery(BuildContext context, WidgetRef ref) async {
-    if (onGalleryPressed != null) {
-      onGalleryPressed!();
+    if (widget.onGalleryPressed != null) {
+      widget.onGalleryPressed!();
       return;
     }
 
@@ -164,7 +181,7 @@ class PhotoUploadScreen extends ConsumerWidget {
   ) {
     switch (result.outcome) {
       case PhotoLibrarySelectionOutcome.selected:
-        onPhotoSelected?.call(result.photoPath!);
+        widget.onPhotoSelected?.call(result.photoPath!);
         return;
       case PhotoLibrarySelectionOutcome.cancelled:
         return;
@@ -175,7 +192,7 @@ class PhotoUploadScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: const DalmAppBar(
         title: '오늘의 사진',
@@ -219,7 +236,11 @@ class PhotoUploadScreen extends ConsumerWidget {
                                   iconBackgroundColor: DalmColors.primaryAction,
                                   title: '카메라로 촬영하기',
                                   description: '지금 마주한 장면을 바로 남겨요.',
-                                  onPressed: () => _openCamera(context, ref),
+                                  onPressed: _isChoosingSource
+                                      ? null
+                                      : () => _runSourceAction(
+                                          () => _openCamera(context, ref),
+                                        ),
                                 ),
                                 const SizedBox(height: 12),
                                 PhotoSourceActionCard(
@@ -228,7 +249,11 @@ class PhotoUploadScreen extends ConsumerWidget {
                                       DalmColors.secondaryAction,
                                   title: '앨범에서 선택하기',
                                   description: '최근 사진에서 한 장을 골라요.',
-                                  onPressed: () => _openGallery(context, ref),
+                                  onPressed: _isChoosingSource
+                                      ? null
+                                      : () => _runSourceAction(
+                                          () => _openGallery(context, ref),
+                                        ),
                                 ),
                               ],
                             ),
@@ -252,7 +277,7 @@ class PhotoUploadScreen extends ConsumerWidget {
             ),
           ),
           PhotoLostDataRecovery(
-            onRecovered: (path) => onPhotoSelected?.call(path),
+            onRecovered: (path) => widget.onPhotoSelected?.call(path),
             onFailed: () =>
                 _showMessage(context, '선택했던 사진을 복구하지 못했어요. 다시 선택해 주세요.'),
           ),

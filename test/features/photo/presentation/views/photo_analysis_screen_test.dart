@@ -70,15 +70,28 @@ void main() {
     expect(find.byKey(const Key('photoAnalysisSteps')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('상태 조회 오류가 발생하면 다시 확인 안내를 표시한다', (tester) async {
+    await tester.pumpWidget(
+      _buildTestApp(
+        imageFile.path,
+        repository: const _ErrorAnalysisRepository(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('사진 상태를 확인하지 못했어요.'), findsOneWidget);
+    expect(find.text('다시 확인하기'), findsOneWidget);
+    expect(find.text('0%'), findsNothing);
+  });
 }
 
-Widget _buildTestApp(String imagePath) {
+Widget _buildTestApp(
+  String imagePath, {
+  PhotoAnalysisRepository repository = const _FixedAnalysisRepository(),
+}) {
   return ProviderScope(
-    overrides: [
-      photoAnalysisRepositoryProvider.overrideWithValue(
-        const _FixedAnalysisRepository(),
-      ),
-    ],
+    overrides: [photoAnalysisRepositoryProvider.overrideWithValue(repository)],
     child: MaterialApp(
       home: PhotoAnalysisScreen(
         imagePath: imagePath,
@@ -87,6 +100,15 @@ Widget _buildTestApp(String imagePath) {
       ),
     ),
   );
+}
+
+final class _ErrorAnalysisRepository implements PhotoAnalysisRepository {
+  const _ErrorAnalysisRepository();
+
+  @override
+  Stream<PhotoAnalysisProgress> watchProgress(String photoId) {
+    return Stream.error(StateError('status lookup failed'));
+  }
 }
 
 final class _FixedAnalysisRepository implements PhotoAnalysisRepository {

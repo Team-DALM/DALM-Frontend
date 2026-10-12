@@ -6,6 +6,7 @@ import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
 import 'package:dalm/core/widgets/dalm_button.dart';
 import 'package:dalm/core/widgets/dalm_photo_frame.dart';
+import 'package:dalm/features/photo/data/services/photo_temporary_file_manager.dart';
 import 'package:dalm/features/photo/presentation/widgets/analysis/photo_search_progress_card.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -34,12 +35,7 @@ class _PhotoRecordScreenState extends State<PhotoRecordScreen> {
   }
 
   Future<void> _deleteTemporaryImage() async {
-    try {
-      final file = File(widget.imagePath);
-      if (await file.exists()) await file.delete();
-    } on FileSystemException {
-      // 임시 이미지 정리 실패는 화면 이동을 막지 않는다.
-    }
+    await PhotoTemporaryFileManager.deleteOwnedFile(widget.imagePath);
   }
 
   @override

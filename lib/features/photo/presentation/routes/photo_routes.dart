@@ -1,5 +1,6 @@
 import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/features/photo/presentation/routes/photo_analysis_route_args.dart';
+import 'package:dalm/features/photo/presentation/routes/photo_flow_coordinator.dart';
 import 'package:dalm/features/photo/presentation/routes/photo_record_route_args.dart';
 import 'package:dalm/features/photo/presentation/routes/photo_rejected_route_args.dart';
 import 'package:dalm/features/photo/presentation/routes/photo_upload_failure_route_args.dart';
@@ -13,8 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 void _openPhotoCrop(BuildContext context, String imagePath) {
-  // 선택한 원본 사진 경로를 크롭 화면에 전달
-  context.push(AppRoutes.photoCrop, extra: imagePath);
+  PhotoFlowCoordinator.openCrop(context, imagePath);
 }
 
 final photoRootRoutes = <RouteBase>[

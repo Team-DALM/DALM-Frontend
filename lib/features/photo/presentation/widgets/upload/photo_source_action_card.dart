@@ -17,12 +17,13 @@ class PhotoSourceActionCard extends StatelessWidget {
   final Color iconBackgroundColor;
   final String title;
   final String description;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
+      enabled: onPressed != null,
       label: title,
       child: Material(
         color: DalmColors.surfaceMuted,
@@ -30,8 +31,8 @@ class PhotoSourceActionCard extends StatelessWidget {
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            height: 70,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 76),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -55,7 +56,7 @@ class PhotoSourceActionCard extends StatelessWidget {
                         Text(
                           title,
                           style: DalmTypography.bodyBold.copyWith(
-                            fontSize: 13,
+                            fontSize: 14,
                             height: 1.2,
                             color: DalmColors.textInk,
                           ),
@@ -64,7 +65,7 @@ class PhotoSourceActionCard extends StatelessWidget {
                         Text(
                           description,
                           style: DalmTypography.caption.copyWith(
-                            fontSize: 9,
+                            fontSize: 12,
                             height: 1.2,
                             color: DalmColors.textWarm,
                           ),

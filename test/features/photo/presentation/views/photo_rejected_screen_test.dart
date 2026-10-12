@@ -58,4 +58,30 @@ void main() {
     expect(imageSize, const Size(240, 300));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('큰 글자 설정에서도 거절 사유가 오버플로되지 않는다', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(320, 700);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: PhotoRejectedScreen(
+            imagePath: imageFile.path,
+            photoId: 'test-photo-id',
+            deleteImageOnDispose: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('빛 정보 부족'), findsOneWidget);
+    expect(find.text('피사체 인식 어려움'), findsOneWidget);
+    expect(find.text('낮은 선명도'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

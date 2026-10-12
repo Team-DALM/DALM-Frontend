@@ -1,3 +1,5 @@
+import 'photo_upload_status.dart';
+
 /// 서버에 접수된 사진 정보
 final class PhotoUploadResult {
   const PhotoUploadResult({
@@ -7,6 +9,6 @@ final class PhotoUploadResult {
   });
 
   final String photoId;
-  final String status;
+  final PhotoUploadStatus status;
   final DateTime registeredAt;
 }

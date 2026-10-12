@@ -1,19 +1,16 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/error/network_exception.dart';
-import 'package:dalm/features/photo/presentation/routes/photo_analysis_route_args.dart';
-import 'package:dalm/features/photo/presentation/routes/photo_upload_failure_route_args.dart';
+import 'package:dalm/features/photo/data/services/photo_temporary_file_manager.dart';
+import 'package:dalm/features/photo/presentation/routes/photo_flow_coordinator.dart';
 import 'package:dalm/features/photo/presentation/view_models/photo_upload_view_model.dart';
 import 'package:dalm/features/photo/presentation/widgets/crop/photo_crop_toolbar.dart';
 import 'package:dalm/features/photo/presentation/widgets/crop/photo_crop_viewport.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 /// 선택한 사진을 4:5 비율로 맞추는 화면
 class PhotoCropScreen extends ConsumerStatefulWidget {
@@ -83,12 +80,10 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
           return;
         }
 
-        context.pushReplacement(
-          AppRoutes.photoAnalysis,
-          extra: PhotoAnalysisRouteArgs(
-            imagePath: outputPath,
-            uploadResult: result,
-          ),
+        PhotoFlowCoordinator.openAnalysis(
+          context,
+          imagePath: outputPath,
+          uploadResult: result,
         );
       } on NetworkException catch (error, stackTrace) {
         _logUploadFailure(error, stackTrace);
@@ -111,12 +106,7 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
   }
 
   Future<void> _deleteTemporaryFile(String path) async {
-    try {
-      final file = File(path);
-      if (await file.exists()) await file.delete();
-    } on FileSystemException {
-      // 임시 파일 삭제 실패는 업로드 결과에 영향 없음
-    }
+    await PhotoTemporaryFileManager.deleteOwnedFile(path);
   }
 
   Future<String> _exportCroppedPhoto() async {
@@ -133,12 +123,9 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) throw StateError('Crop image encoding failed.');
 
-      final outputFile = File(
-        '${Directory.systemTemp.path}${Platform.pathSeparator}'
-        'dalm_photo_${DateTime.now().microsecondsSinceEpoch}.png',
+      return await PhotoTemporaryFileManager.createPng(
+        byteData.buffer.asUint8List(),
       );
-      await outputFile.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
-      return outputFile.path;
     } finally {
       image.dispose();
     }
@@ -169,10 +156,7 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
   }
 
   void _openUploadFailure(String imagePath) {
-    context.pushReplacement(
-      AppRoutes.photoUploadFailure,
-      extra: PhotoUploadFailureRouteArgs(imagePath: imagePath),
-    );
+    PhotoFlowCoordinator.openUploadFailure(context, imagePath);
   }
 
   void _setImageReady(bool isReady) {
@@ -182,78 +166,87 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: DalmColors.photoEditorBackground,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _CropHeader(
-              isExporting: _isExporting,
-              canProceed: _isImageReady,
-              onBack: () => Navigator.of(context).maybePop(),
-              onNext: _complete,
-            ),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final cropAreaWidth = constraints.maxWidth.clamp(0.0, 390.0);
-                  final designScale = cropAreaWidth / 390;
-                  final cropAreaHeight = 490 * designScale;
-                  final cropWidth = (cropAreaWidth - 60).clamp(0.0, 330.0);
+    return PopScope(
+      canPop: !_isExporting,
+      child: Scaffold(
+        backgroundColor: DalmColors.photoEditorBackground,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _CropHeader(
+                isExporting: _isExporting,
+                canProceed: _isImageReady,
+                onBack: _isExporting
+                    ? null
+                    : () => Navigator.of(context).maybePop(),
+                onNext: _complete,
+              ),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final cropAreaWidth = constraints.maxWidth.clamp(
+                      0.0,
+                      390.0,
+                    );
+                    final designScale = cropAreaWidth / 390;
+                    final cropAreaHeight = 490 * designScale;
+                    final cropWidth = (cropAreaWidth - 60).clamp(0.0, 330.0);
 
-                  return SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight,
-                      ),
-                      child: Column(
-                        children: [
-                          PhotoCropViewport(
-                            imagePath: widget.imagePath,
-                            boundaryKey: _cropBoundaryKey,
-                            transformationController: _transformationController,
-                            quarterTurns: _quarterTurns,
-                            areaWidth: cropAreaWidth,
-                            areaHeight: cropAreaHeight,
-                            cropWidth: cropWidth,
-                            onImageReadyChanged: _setImageReady,
-                          ),
-                          Text(
-                            '손가락으로 확대하고 움직여 장면을 맞춰주세요.',
-                            style: DalmTypography.caption.copyWith(
-                              fontSize: 10,
-                              color: DalmColors.photoEditorTextSecondary,
+                    return SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: Column(
+                          children: [
+                            PhotoCropViewport(
+                              imagePath: widget.imagePath,
+                              boundaryKey: _cropBoundaryKey,
+                              transformationController:
+                                  _transformationController,
+                              quarterTurns: _quarterTurns,
+                              areaWidth: cropAreaWidth,
+                              areaHeight: cropAreaHeight,
+                              cropWidth: cropWidth,
+                              onImageReadyChanged: _setImageReady,
                             ),
-                          ),
-                          const SizedBox(height: 37),
-                          SizedBox(
-                            width: (cropAreaWidth - 44).clamp(0.0, 346.0),
-                            child: Divider(
-                              key: const Key('photoCropToolbarDivider'),
-                              height: 1,
-                              thickness: 1,
-                              color: DalmColors.textInverse.withValues(
-                                alpha: 0.18,
+                            Text(
+                              '손가락으로 확대하고 움직여 장면을 맞춰주세요.',
+                              style: DalmTypography.caption.copyWith(
+                                fontSize: 10,
+                                color: DalmColors.photoEditorTextSecondary,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: cropAreaWidth,
-                            child: PhotoCropToolbar(
-                              onReset: _reset,
-                              onRotate: _rotate,
+                            const SizedBox(height: 37),
+                            SizedBox(
+                              width: (cropAreaWidth - 44).clamp(0.0, 346.0),
+                              child: Divider(
+                                key: const Key('photoCropToolbarDivider'),
+                                height: 1,
+                                thickness: 1,
+                                color: DalmColors.textInverse.withValues(
+                                  alpha: 0.18,
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 32),
-                        ],
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: cropAreaWidth,
+                              child: PhotoCropToolbar(
+                                onReset: _reset,
+                                onRotate: _rotate,
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -271,7 +264,7 @@ class _CropHeader extends StatelessWidget {
 
   final bool isExporting;
   final bool canProceed;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
   final VoidCallback onNext;
 
   @override

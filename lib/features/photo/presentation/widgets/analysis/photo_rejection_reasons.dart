@@ -32,26 +32,25 @@ class PhotoRejectionReasons extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: _reasons.map((reason) {
-              return Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(
-                    right: reason == _reasons.last ? 0 : 7,
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: reason.$3,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    reason.$1,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    style: DalmTypography.caption.copyWith(
-                      fontSize: 8,
-                      color: reason.$2,
-                    ),
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 9,
+                ),
+                decoration: BoxDecoration(
+                  color: reason.$3,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  reason.$1,
+                  textAlign: TextAlign.center,
+                  style: DalmTypography.caption.copyWith(
+                    fontSize: 12,
+                    color: reason.$2,
                   ),
                 ),
               );

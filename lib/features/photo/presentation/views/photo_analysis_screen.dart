@@ -1,18 +1,14 @@
-import 'dart:io';
-
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
-import 'package:dalm/app/router/app_routes.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
 import 'package:dalm/features/photo/data/providers/photo_analysis_providers.dart';
+import 'package:dalm/features/photo/data/services/photo_temporary_file_manager.dart';
 import 'package:dalm/features/photo/domain/entities/photo_analysis_progress.dart';
-import 'package:dalm/features/photo/presentation/routes/photo_record_route_args.dart';
-import 'package:dalm/features/photo/presentation/routes/photo_rejected_route_args.dart';
+import 'package:dalm/features/photo/presentation/routes/photo_flow_coordinator.dart';
 import 'package:dalm/features/photo/presentation/widgets/analysis/photo_analysis_image.dart';
 import 'package:dalm/features/photo/presentation/widgets/analysis/photo_analysis_steps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 class PhotoAnalysisScreen extends ConsumerStatefulWidget {
   const PhotoAnalysisScreen({
@@ -43,12 +39,7 @@ class _PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   }
 
   Future<void> _deleteTemporaryImage() async {
-    try {
-      final file = File(widget.imagePath);
-      if (await file.exists()) await file.delete();
-    } on FileSystemException {
-      // 임시 이미지 정리 실패는 화면 흐름에 영향을 주지 않는다.
-    }
+    await PhotoTemporaryFileManager.deleteOwnedFile(widget.imagePath);
   }
 
   @override
@@ -59,33 +50,23 @@ class _PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
         return;
       }
 
-      switch (progress.status) {
-        case PhotoAnalysisStatus.searching:
-          _transferredImage = true;
-          context.pushReplacement(
-            AppRoutes.photoRecord,
-            extra: PhotoRecordRouteArgs(
-              imagePath: widget.imagePath,
-              photoId: widget.photoId,
-            ),
-          );
-        case PhotoAnalysisStatus.rejected:
-          _transferredImage = true;
-          context.pushReplacement(
-            AppRoutes.photoRejected,
-            extra: PhotoRejectedRouteArgs(
-              imagePath: widget.imagePath,
-              photoId: widget.photoId,
-            ),
-          );
-        case PhotoAnalysisStatus.validating:
-          break;
-      }
+      _transferredImage = PhotoFlowCoordinator.openAnalysisResult(
+        context,
+        progress: progress,
+        imagePath: widget.imagePath,
+        photoId: widget.photoId,
+      );
     });
 
     final analysisState = ref.watch(
       photoAnalysisProgressProvider(widget.photoId),
     );
+    if (analysisState.hasError) {
+      return _PhotoAnalysisErrorView(
+        onRetry: () =>
+            ref.invalidate(photoAnalysisProgressProvider(widget.photoId)),
+      );
+    }
     final analysis = switch (analysisState) {
       AsyncData(:final value) => value,
       _ => const PhotoAnalysisProgress(
@@ -173,6 +154,67 @@ class _PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _PhotoAnalysisErrorView extends StatelessWidget {
+  const _PhotoAnalysisErrorView({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: DalmColors.background,
+      appBar: const DalmAppBar(
+        title: '사진 상태 확인',
+        showBackButton: true,
+        leadingWidth: 44,
+        dividerIndent: 20,
+      ),
+      body: SafeArea(
+        top: false,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.cloud_off_outlined,
+                  size: 48,
+                  color: DalmColors.textSecondary,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  '사진 상태를 확인하지 못했어요.',
+                  textAlign: TextAlign.center,
+                  style: DalmTypography.serifHeadline.copyWith(fontSize: 20),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '사진은 이미 접수되었을 수 있어요.\n새로 업로드하지 말고 상태를 다시 확인해 주세요.',
+                  textAlign: TextAlign.center,
+                  style: DalmTypography.caption.copyWith(
+                    fontSize: 13,
+                    color: DalmColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                FilledButton(
+                  onPressed: onRetry,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(180, 48),
+                    backgroundColor: DalmColors.primaryAction,
+                  ),
+                  child: const Text('다시 확인하기'),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
