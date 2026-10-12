@@ -23,9 +23,9 @@ class ProfileTimeCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 9),
           const _TimeRangeBar(),
-          const SizedBox(height: 14),
+          const SizedBox(height: 15),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -33,14 +33,14 @@ class ProfileTimeCard extends StatelessWidget {
                 '06:00',
                 style: DalmTypography.caption.copyWith(
                   color: DalmColors.textWarm,
-                  fontSize: 8,
+                  fontSize: 9,
                 ),
               ),
               Text(
                 '24:00',
                 style: DalmTypography.caption.copyWith(
                   color: DalmColors.textWarm,
-                  fontSize: 8,
+                  fontSize: 9,
                 ),
               ),
             ],
@@ -74,7 +74,8 @@ class _TimeRangeBar extends StatelessWidget {
               widthFactor: 0.38,
               child: Container(
                 height: 6,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3),
                   gradient: LinearGradient(
                     colors: [
                       DalmProfileColors.analysisBlue,
