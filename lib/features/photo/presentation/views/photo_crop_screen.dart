@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
+import 'package:dalm/features/home/presentation/view_models/home_view_model.dart';
 import 'package:dalm/features/photo/presentation/view_models/photo_upload_view_model.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_crop_toolbar.dart';
 import 'package:dalm/features/photo/presentation/widgets/photo_crop_viewport.dart';
@@ -73,7 +74,10 @@ class _PhotoCropScreenState extends ConsumerState<PhotoCropScreen> {
             .read(photoUploadViewModelProvider)
             .uploadPhoto(outputPath);
 
-        if (mounted) Navigator.of(context).pop(result);
+        if (mounted) {
+          ref.invalidate(homeViewModelProvider);
+          Navigator.of(context).pop(result);
+        }
       } catch (_) {
         if (mounted) _showUploadFailure();
       } finally {
