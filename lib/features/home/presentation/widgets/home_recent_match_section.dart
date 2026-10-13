@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/dalm_colors.dart';
 import '../../../../app/theme/dalm_typography.dart';
 import '../../../../core/widgets/dalm_photo_pair.dart';
+import '../../../../core/widgets/authenticated_network_image_provider.dart';
 import '../../domain/entities/home_recent_match.dart';
 
 /// 사용자가 아직 확인하지 않은 가장 최근 매칭을 보여주는 영역입니다.
@@ -70,8 +71,12 @@ class HomeRecentMatchSection extends StatelessWidget {
                   child: Column(
                     children: [
                       DalmPhotoPair(
-                        leftImage: NetworkImage(match.myImageUrl),
-                        rightImage: NetworkImage(match.partnerImageUrl),
+                        leftImage: AuthenticatedNetworkImageProvider(
+                          match.myImageUrl,
+                        ),
+                        rightImage: AuthenticatedNetworkImageProvider(
+                          match.partnerImageUrl,
+                        ),
                         status: DalmPhotoPairStatus.hidden,
                       ),
                       const SizedBox(height: 12),
