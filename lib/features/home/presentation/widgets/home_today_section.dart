@@ -5,6 +5,7 @@ import '../../../../app/theme/dalm_typography.dart';
 import '../../../../core/widgets/dalm_button.dart';
 import '../../../../core/widgets/dalm_photo_frame.dart';
 import '../../../../core/widgets/dalm_photo_pair.dart';
+import '../../../../core/widgets/authenticated_network_image_provider.dart';
 import '../../domain/entities/home_today_photo.dart';
 import 'home_headline.dart';
 
@@ -272,7 +273,7 @@ class _PrimaryValidatingTodayView extends StatelessWidget {
                 FractionallySizedBox(
                   widthFactor: 0.72,
                   child: DalmPhotoFrame(
-                    image: NetworkImage(photo.imageUrl),
+                    image: AuthenticatedNetworkImageProvider(photo.imageUrl),
                     semanticLabel: '확인 중인 오늘의 사진',
                     overlay: const _ValidatingPhotoOverlay(),
                   ),
@@ -354,7 +355,9 @@ class _CompactValidatingTodayView extends StatelessWidget {
                       SizedBox(
                         width: constraints.maxWidth * _imageWidthFactor,
                         child: DalmPhotoFrame(
-                          image: NetworkImage(photo.imageUrl),
+                          image: AuthenticatedNetworkImageProvider(
+                            photo.imageUrl,
+                          ),
                           semanticLabel: '확인 중인 오늘의 사진',
                           overlay: const _ValidatingPhotoOverlay(compact: true),
                         ),
@@ -519,7 +522,7 @@ class _PrimaryRejectedTodayView extends StatelessWidget {
                 FractionallySizedBox(
                   widthFactor: 0.68,
                   child: DalmPhotoFrame(
-                    image: NetworkImage(photo.imageUrl),
+                    image: AuthenticatedNetworkImageProvider(photo.imageUrl),
                     semanticLabel: '등록이 거절된 오늘의 사진',
                     overlay: const _RejectedPhotoOverlay(),
                   ),
@@ -620,7 +623,9 @@ class _CompactRejectedTodayView extends StatelessWidget {
                         SizedBox(
                           width: constraints.maxWidth * _imageWidthFactor,
                           child: DalmPhotoFrame(
-                            image: NetworkImage(photo.imageUrl),
+                            image: AuthenticatedNetworkImageProvider(
+                              photo.imageUrl,
+                            ),
                             semanticLabel: '등록이 거절된 오늘의 사진',
                             overlay: const _RejectedPhotoOverlay(compact: true),
                           ),
@@ -765,7 +770,7 @@ class _PrimarySearchingTodayView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DalmPhotoPair(
-                  leftImage: NetworkImage(photo.imageUrl),
+                  leftImage: AuthenticatedNetworkImageProvider(photo.imageUrl),
                   status: DalmPhotoPairStatus.searching,
                 ),
                 const SizedBox(height: 14),
@@ -853,8 +858,10 @@ class _CompactSearchingTodayView extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: constraints.maxWidth * _imageWidthFactor,
-                      child: Image.network(
-                        photo.imageUrl,
+                      child: Image(
+                        image: AuthenticatedNetworkImageProvider(
+                          photo.imageUrl,
+                        ),
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return const ColoredBox(
@@ -1016,8 +1023,12 @@ class _PrimaryMatchedTodayView extends StatelessWidget {
               child: Column(
                 children: [
                   DalmPhotoPair(
-                    leftImage: NetworkImage(photo.imageUrl),
-                    rightImage: NetworkImage(partnerImageUrl),
+                    leftImage: AuthenticatedNetworkImageProvider(
+                      photo.imageUrl,
+                    ),
+                    rightImage: AuthenticatedNetworkImageProvider(
+                      partnerImageUrl,
+                    ),
                     status: DalmPhotoPairStatus.hidden,
                   ),
                   const SizedBox(height: 12),
@@ -1116,8 +1127,12 @@ class _CompactMatchedTodayView extends StatelessWidget {
                           SizedBox(
                             width: constraints.maxWidth * _pairWidthFactor,
                             child: DalmPhotoPair(
-                              leftImage: NetworkImage(photo.imageUrl),
-                              rightImage: NetworkImage(partnerImageUrl),
+                              leftImage: AuthenticatedNetworkImageProvider(
+                                photo.imageUrl,
+                              ),
+                              rightImage: AuthenticatedNetworkImageProvider(
+                                partnerImageUrl,
+                              ),
                               status: DalmPhotoPairStatus.hidden,
                               hiddenLabel: '아직 가려진\n낯선 장면',
                             ),

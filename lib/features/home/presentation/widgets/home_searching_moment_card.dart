@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/dalm_colors.dart';
 import '../../../../app/theme/dalm_typography.dart';
 import '../../../../core/widgets/dalm_progress_indicator.dart';
+import '../../../../core/widgets/authenticated_network_image_provider.dart';
 import '../../domain/entities/home_searching_moment.dart';
 
 class HomeSearchingMomentCard extends StatelessWidget {
@@ -100,8 +101,8 @@ class _MomentImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      imageUrl,
+    return Image(
+      image: AuthenticatedNetworkImageProvider(imageUrl),
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
         return const ColoredBox(
