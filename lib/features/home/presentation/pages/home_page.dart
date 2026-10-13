@@ -20,6 +20,9 @@ class HomePage extends ConsumerWidget {
       appBar: DalmAppBar(
         title: 'DALM',
         infoLabel: _formatDate(DateTime.now()),
+        onNotificationPressed: () {
+          // TODO: 알림 목록 화면 연결
+        },
       ),
       body: homeState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
