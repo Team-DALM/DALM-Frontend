@@ -12,6 +12,7 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actionLabel,
     this.onActionPressed,
     this.infoLabel,
+    this.onNotificationPressed,
     this.onMorePressed,
   }) : assert(
          actionLabel == null || onActionPressed != null,
@@ -19,9 +20,10 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
        ),
        assert(
          (actionLabel == null || infoLabel == null) &&
+             (actionLabel == null || onNotificationPressed == null) &&
              (actionLabel == null || onMorePressed == null) &&
              (infoLabel == null || onMorePressed == null),
-         '오른쪽 액션, 정보 문구, 더보기 버튼은 동시에 사용할 수 없습니다.',
+         '오른쪽 액션은 정보 문구, 알림, 더보기 버튼과 동시에 사용할 수 없습니다.',
        );
 
   final String title;
@@ -30,6 +32,7 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? actionLabel;
   final VoidCallback? onActionPressed;
   final String? infoLabel;
+  final VoidCallback? onNotificationPressed;
   final VoidCallback? onMorePressed;
 
   @override
@@ -82,7 +85,10 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
           )
         else if (infoLabel != null)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.only(
+              left: 16,
+              right: onNotificationPressed == null ? 16 : 4,
+            ),
             child: Center(
               child: Text(
                 infoLabel!,
@@ -100,6 +106,18 @@ class DalmAppBar extends StatelessWidget implements PreferredSizeWidget {
               color: DalmColors.textSecondary,
             ),
             tooltip: '더보기',
+          ),
+        if (onNotificationPressed != null)
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              onPressed: onNotificationPressed,
+              icon: const Icon(
+                Icons.notifications_none_rounded,
+                color: DalmColors.textPrimary,
+              ),
+              tooltip: '알림',
+            ),
           ),
       ],
 
