@@ -47,6 +47,7 @@ class ProfileRecentRecords extends StatelessWidget {
                     borderRadius: BorderRadius.circular(5),
                     child: Image.asset(
                       _photos[index],
+                      cacheWidth: 160,
                       fit: BoxFit.cover,
                       alignment: index.isEven
                           ? Alignment.centerLeft

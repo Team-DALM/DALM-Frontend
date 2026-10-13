@@ -2,19 +2,23 @@ import 'package:dalm/app/theme/dalm_colors.dart';
 import 'package:dalm/app/theme/dalm_typography.dart';
 import 'package:dalm/core/widgets/dalm_app_bar.dart';
 import 'package:dalm/features/profile/presentation/routes/profile_routes.dart';
+import 'package:dalm/features/profile/presentation/view_models/profile_view_model.dart';
 import 'package:dalm/features/profile/presentation/widgets/main/profile_recent_records.dart';
 import 'package:dalm/features/profile/presentation/widgets/main/profile_settings_tile.dart';
 import 'package:dalm/features/profile/presentation/widgets/main/profile_stats.dart';
 import 'package:dalm/features/profile/presentation/widgets/main/profile_traveler_card.dart';
 import 'package:dalm/features/profile/presentation/widgets/main/profile_vision_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileState = ref.watch(profileViewModelProvider);
+
     return Scaffold(
       backgroundColor: DalmColors.background,
       appBar: DalmAppBar(
@@ -29,10 +33,13 @@ class ProfileScreen extends StatelessWidget {
           letterSpacing: -0.2,
         ),
       ),
-      body: SingleChildScrollView(
-        key: const Key('profile-scroll-view'),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-        child: Column(
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(profileViewModelProvider.notifier).refresh(),
+        child: SingleChildScrollView(
+          key: const Key('profile-scroll-view'),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -43,9 +50,22 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 13),
-            ProfileTravelerCard(
-              onTap: () =>
-                  context.push(ProfileRouteLocations.accountSettings),
+            profileState.when(
+              data: (profile) => ProfileTravelerCard(
+                nickname: profile.nickname,
+                recordSince: _formatRecordSince(profile.createdAt),
+                onTap: () =>
+                    context.push(ProfileRouteLocations.accountSettings),
+              ),
+              loading: () => ProfileTravelerCard(
+                nickname: '',
+                recordSince: '',
+                isLoading: true,
+              ),
+              error: (error, stackTrace) => ProfileTravelerCard(
+                nickname: '프로필을 불러오지 못했어요.',
+                recordSince: '화면을 새로고침하여 다시 시도해 주세요.',
+              ),
             ),
             const SizedBox(height: 19),
             ProfileVisionCard(
@@ -91,9 +111,15 @@ class ProfileScreen extends StatelessWidget {
               onTap: () =>
                   context.push(ProfileRouteLocations.accountSettings),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _formatRecordSince(DateTime createdAt) {
+    final localDate = createdAt.toLocal();
+    return '${localDate.year}년 ${localDate.month}월부터 기록 중';
   }
 }
