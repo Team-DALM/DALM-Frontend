@@ -11,9 +11,11 @@ HomeSearchingMomentDto _$HomeSearchingMomentDtoFromJson(
 ) => HomeSearchingMomentDto(
   photoId: json['photo_id'] as String,
   imageUrl: json['image_url'] as String,
-  aiTitle: json['ai_title'] as String,
+  aiTitle: json['ai_title'] as String?,
   status: json['status'] as String,
   registeredAt: DateTime.parse(json['registered_at'] as String),
-  searchExpiresAt: DateTime.parse(json['search_expires_at'] as String),
-  remainingDays: (json['remaining_days'] as num).toInt(),
+  searchExpiresAt: json['search_expires_at'] == null
+      ? null
+      : DateTime.parse(json['search_expires_at'] as String),
+  remainingDays: (json['remaining_days'] as num?)?.toInt(),
 );

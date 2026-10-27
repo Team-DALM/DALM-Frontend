@@ -11,10 +11,10 @@ final class HomeSearchingMoment {
   // 사진 기본 정보
   final String id;
   final String imageUrl;
-  final String aiTitle;
+  final String? aiTitle;
   final DateTime registeredAt;
 
   // 매칭 탐색 진행 정보
-  final DateTime searchExpiresAt;
-  final int remainingDays;
+  final DateTime? searchExpiresAt;
+  final int? remainingDays;
 }

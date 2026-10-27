@@ -26,7 +26,7 @@ class HomeRecentMatchSection extends StatelessWidget {
     return MediaQuery.withNoTextScaling(
       child: Semantics(
         button: true,
-        label: '${match.aiTitle}, 닮은 순간 열기',
+        label: '${match.aiTitle ?? '닮은 순간을 발견했어요.'}, 닮은 순간 열기',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -52,7 +52,7 @@ class HomeRecentMatchSection extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              match.aiTitle,
+              match.aiTitle ?? '닮은 순간을 발견했어요.',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: DalmTypography.serifHeadline.copyWith(

@@ -10,6 +10,50 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('HomeMapper', () {
+    for (final includeNulls in [false, true]) {
+      test('nullable 필드가 ${includeNulls ? 'null이어도' : '생략되어도'} 홈 응답을 변환한다', () {
+        final searchingJson = <String, dynamic>{
+          'photo_id': 'photo-1',
+          'image_url': 'https://example.com/photo.jpg',
+          'status': 'SEARCHING',
+          'registered_at': '2026-10-26T10:00:00Z',
+          if (includeNulls) ...{
+            'ai_title': null,
+            'search_expires_at': null,
+            'remaining_days': null,
+          },
+        };
+        final matchJson = <String, dynamic>{
+          'match_id': 'match-1',
+          'my_photo_id': 'photo-2',
+          'my_image_url': 'https://example.com/mine.jpg',
+          'partner_image_url': 'https://example.com/partner.jpg',
+          'matched_at': '2026-10-27T10:00:00Z',
+          if (includeNulls) 'ai_title': null,
+        };
+
+        final result = HomeMapper.toHomeOverview(
+          todayData: HomeTodayDataDto.fromJson({
+            'can_register': true,
+            'photo': null,
+          }),
+          searchingData: HomeSearchingMomentListDto.fromJson({
+            'items': [searchingJson],
+          }),
+          recentMatchData: HomeRecentMatchDataDto.fromJson({
+            'match': matchJson,
+            'unviewed_match_count': 1,
+          }),
+        );
+
+        expect(result.searchingMoments.single.aiTitle, isNull);
+        expect(result.searchingMoments.single.searchExpiresAt, isNull);
+        expect(result.searchingMoments.single.remainingDays, isNull);
+        expect(result.recentMatch, isNotNull);
+        expect(result.recentMatch!.aiTitle, isNull);
+      });
+    }
+
     group('toTodayPhotoEntity', () {
       test('DTO가 null이면 null을 반환한다', () {
         final result = HomeMapper.toTodayPhotoEntity(null);

@@ -31,8 +31,10 @@ class HomeSearchingMomentCard extends StatelessWidget {
   /// 7일 남음 → DAY 1
   /// 4일 남음 → DAY 4
   /// 1일 남음 → DAY 7
-  int get _currentDay {
-    return (_totalDays - moment.remainingDays + 1).clamp(1, _totalDays);
+  int? get _currentDay {
+    final remainingDays = moment.remainingDays;
+    if (remainingDays == null) return null;
+    return (_totalDays - remainingDays + 1).clamp(1, _totalDays);
   }
 
   @override
@@ -41,9 +43,9 @@ class HomeSearchingMomentCard extends StatelessWidget {
       child: Semantics(
         button: true,
         label:
-            '${moment.aiTitle}, '
-            '탐색 $_currentDay일 차, '
-            '${moment.remainingDays}일 남음',
+            '${moment.aiTitle ?? '닮은 순간을 찾고 있어요.'}, '
+            '${_currentDay == null ? '탐색 중' : '탐색 $_currentDay일 차'}'
+            '${moment.remainingDays == null ? '' : ', ${moment.remainingDays}일 남음'}',
         child: AspectRatio(
           aspectRatio: _cardAspectRatio,
           child: LayoutBuilder(
@@ -128,7 +130,7 @@ class _MomentInformation extends StatelessWidget {
   });
 
   final HomeSearchingMoment moment;
-  final int currentDay;
+  final int? currentDay;
   final int totalDays;
 
   @override
@@ -140,7 +142,7 @@ class _MomentInformation extends StatelessWidget {
         children: [
           Text(
             '${_formatDate(moment.registeredAt)}'
-            ' · DAY $currentDay',
+            '${currentDay == null ? '' : ' · DAY $currentDay'}',
             style: DalmTypography.caption.copyWith(
               fontSize: 10,
               height: 1.2,
@@ -150,7 +152,7 @@ class _MomentInformation extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            moment.aiTitle,
+            moment.aiTitle ?? '닮은 순간을 찾고 있어요.',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: DalmTypography.serifHeadline.copyWith(
@@ -162,10 +164,11 @@ class _MomentInformation extends StatelessWidget {
           const Spacer(),
 
           // 기존 공통 진행바 사용
-          DalmProgressIndicator.linear(
-            currentDay: currentDay,
-            totalDays: totalDays,
-          ),
+          if (currentDay != null)
+            DalmProgressIndicator.linear(
+              currentDay: currentDay!,
+              totalDays: totalDays,
+            ),
 
           const SizedBox(height: 8),
           Text(
@@ -181,7 +184,9 @@ class _MomentInformation extends StatelessWidget {
           Row(
             children: [
               Text(
-                '${moment.remainingDays}일 남음',
+                moment.remainingDays == null
+                    ? '탐색 중'
+                    : '${moment.remainingDays}일 남음',
                 style: DalmTypography.bodyBold.copyWith(
                   fontSize: 12,
                   color: DalmColors.emotionalAccent,
