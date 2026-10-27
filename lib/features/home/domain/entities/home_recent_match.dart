@@ -15,6 +15,6 @@ final class HomeRecentMatch {
   final String partnerImageUrl;
 
   // 매칭 결과 정보
-  final String aiTitle;
+  final String? aiTitle;
   final DateTime matchedAt;
 }

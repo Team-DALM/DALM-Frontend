@@ -12,6 +12,6 @@ HomeRecentMatchDto _$HomeRecentMatchDtoFromJson(Map<String, dynamic> json) =>
       myPhotoId: json['my_photo_id'] as String,
       myImageUrl: json['my_image_url'] as String,
       partnerImageUrl: json['partner_image_url'] as String,
-      aiTitle: json['ai_title'] as String,
+      aiTitle: json['ai_title'] as String?,
       matchedAt: DateTime.parse(json['matched_at'] as String),
     );

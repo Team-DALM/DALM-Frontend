@@ -20,7 +20,7 @@ final class HomeRecentMatchDto {
   final String partnerImageUrl;
 
   // 매칭 결과 정보
-  final String aiTitle;
+  final String? aiTitle;
   final DateTime matchedAt;
 
   factory HomeRecentMatchDto.fromJson(Map<String, dynamic> json) {

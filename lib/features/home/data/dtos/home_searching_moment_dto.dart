@@ -17,13 +17,13 @@ final class HomeSearchingMomentDto {
   // 사진 기본 정보
   final String photoId;
   final String imageUrl;
-  final String aiTitle;
+  final String? aiTitle;
   final String status;
   final DateTime registeredAt;
 
   // 매칭 탐색 진행 정보
-  final DateTime searchExpiresAt;
-  final int remainingDays;
+  final DateTime? searchExpiresAt;
+  final int? remainingDays;
 
   factory HomeSearchingMomentDto.fromJson(Map<String, dynamic> json) {
     return _$HomeSearchingMomentDtoFromJson(json);
