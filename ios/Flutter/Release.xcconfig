@@ -1,2 +1,3 @@
+DALM_HTTP_HOST=localhost
 #include "../../.env"
 #include "Generated.xcconfig"

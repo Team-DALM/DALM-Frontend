@@ -85,6 +85,19 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+		<key>NSAppTransportSecurity</key>
+		<dict>
+			<key>NSExceptionDomains</key>
+			<dict>
+				<key>$(DALM_HTTP_HOST)</key>
+				<dict>
+					<key>NSExceptionAllowsInsecureHTTPLoads</key>
+					<true/>
+					<key>NSIncludesSubdomains</key>
+					<false/>
+				</dict>
+			</dict>
+		</dict>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>
