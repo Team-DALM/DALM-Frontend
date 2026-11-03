@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.net.URI
 
 plugins {
     id("com.android.application")
@@ -21,8 +22,28 @@ val kakaoNativeAppKey = dalmEnvironment.getProperty("KAKAO_NATIVE_APP_KEY")
     ?.takeIf { it.isNotEmpty() }
     ?: throw GradleException("KAKAO_NATIVE_APP_KEY가 설정되지 않았습니다.")
 
+val apiBaseUrl = dalmEnvironment.getProperty("API_BASE_URL")?.trim()
+    ?: throw GradleException("API_BASE_URL이 설정되지 않았습니다.")
+val apiUri = URI(apiBaseUrl)
+val httpApiHost = if (apiUri.scheme == "http") apiUri.host
+    ?: throw GradleException("HTTP API host is missing") else ""
+val networkSecurityResources = layout.buildDirectory.dir("generated/dalmNetworkSecurity/res")
+val generateDalmNetworkSecurity = tasks.register("generateDalmNetworkSecurity") {
+    inputs.property("httpApiHost", httpApiHost)
+    outputs.dir(networkSecurityResources)
+    doLast {
+        val output = networkSecurityResources.get().file("xml/dalm_network_security_config.xml").asFile
+        output.parentFile.mkdirs()
+        val exception = if (httpApiHost.isEmpty()) "" else
+            "<domain-config cleartextTrafficPermitted=\"true\"><domain includeSubdomains=\"false\">$httpApiHost</domain></domain-config>"
+        output.writeText("<network-security-config><base-config cleartextTrafficPermitted=\"false\"/>$exception</network-security-config>")
+    }
+}
+tasks.named("preBuild").configure { dependsOn(generateDalmNetworkSecurity) }
+
 android {
     namespace = "com.goodshot.dalm"
+    sourceSets.getByName("main").res.srcDir(networkSecurityResources.get().asFile)
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

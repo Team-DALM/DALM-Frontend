@@ -806,3 +806,25 @@ flutter test
 - 불필요한 `setState`를 사용하지 않았는가?
 - UI 변경이면 스크린샷을 첨부했는가?
 - 테스트와 정적 분석이 통과하는가?
+
+## 학교 AWS HTTP API 연결
+
+AWS의 현재 주소를 전달받은 뒤 아래 명령으로 로컬 `.env`를 갱신합니다.
+실제 서버 IP와 로그인 키는 커밋하지 않습니다.
+
+```bash
+dart run tool/configure_api.dart http://YOUR_EC2_PUBLIC_IP/v1/
+flutter clean
+flutter run
+```
+
+기존 Kakao 키는 보존합니다. Android는 `.env`의 API 호스트에만 HTTP를 허용하는
+네트워크 설정을 빌드 시 생성하며, release의 INTERNET 권한도 포함합니다.
+iOS는 `DALM_HTTP_HOST`에만 ATS 예외를 적용하고 전역 ATS 해제는 하지 않습니다.
+HTTP API 데이터와 토큰은 전송 중 암호화되지 않습니다. S3 사진 URL은 HTTPS를 유지합니다.
+IP가 변경되거나 EIP를 부착하면 같은 명령으로 다시 설정하고 앱을 재빌드합니다.
+
+실기기에서는 Kakao/Apple 로그인, 토큰 재발급, 사진 업로드·조회까지 확인해야 합니다.
+
+플랫폼 정책 참고: [Android Network Security Configuration](https://developer.android.com/privacy-and-security/security-config),
+[Apple ATS 예외 도메인](https://developer.apple.com/documentation/bundleresources/information-property-list/nsapptransportsecurity/nsexceptiondomains).
