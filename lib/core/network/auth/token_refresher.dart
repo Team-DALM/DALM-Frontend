@@ -5,9 +5,7 @@ import '../dto/api_response_dto.dart';
 import '../dto/token_pair_dto.dart';
 
 final class TokenRefresher {
-  TokenRefresher({required Dio dio, required TokenStorage tokenStorage})
-    : _dio = dio,
-      _tokenStorage = tokenStorage;
+  TokenRefresher({required this._dio, required this._tokenStorage});
 
   final Dio _dio;
   final TokenStorage _tokenStorage;

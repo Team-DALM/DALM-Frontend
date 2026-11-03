@@ -5,12 +5,10 @@ import '../auth/token_refresher.dart';
 
 final class AuthInterceptor extends Interceptor {
   AuthInterceptor({
-    required Dio dio,
-    required TokenStorage tokenStorage,
-    required TokenRefresher tokenRefresher,
-  }) : _dio = dio,
-       _tokenStorage = tokenStorage,
-       _tokenRefresher = tokenRefresher;
+    required this._dio,
+    required this._tokenStorage,
+    required this._tokenRefresher,
+  });
 
   final Dio _dio;
   final TokenStorage _tokenStorage;
@@ -55,11 +53,11 @@ final class AuthInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException exception, ErrorInterceptorHandler handler) async {
-    final requestOptions = exception.requestOptions;
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    final requestOptions = err.requestOptions;
 
-    if (!_shouldRefresh(exception)) {
-      handler.next(exception);
+    if (!_shouldRefresh(err)) {
+      handler.next(err);
       return;
     }
 
